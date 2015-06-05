@@ -1,0 +1,11 @@
+read_file = open('Probando20')
+exits[5]
+loads=[0,0,0,0,0]
+spans=[23,26,28,27,22]
+for line in read_file:
+	tipo=line.split()[0]
+	tarea=line.split()[2]
+	if tipo=="CPU" or tipo=="BLOCK":
+	elif tipo=="EXIT":
+		exits[tarea]=line.split()[1]
+print exits
