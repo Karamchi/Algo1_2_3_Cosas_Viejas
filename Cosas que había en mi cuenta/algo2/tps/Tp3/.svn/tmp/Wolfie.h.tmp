@@ -1,0 +1,260 @@
+#include "DiccT.h"
+#include "DiccOrd.h"
+#include "Titulo.h"
+
+using namespace std;
+using namespace aed2;
+
+typedef Nat Cliente;
+typedef Nat Acciones;
+
+struct Wolfie {
+    public:
+        Conj<Cliente>::Iterador Clientes();
+        ///DiccT<Titulo>::Iterador Titulos(); acá iría el súper iterador que decía el ayudante
+        Conj<Promesa>::Iterador promesasDe(Cliente c);
+        Nat accionesPorCliente(Cliente c, Nombre nt);
+        Wolfie inaugurarWolfie (Conj<Cliente> cs);
+        void agregarTitulo(Titulo t);
+        void actualizarCotizacion(Nombre nt, Nat cot);
+        void agregarPromesa(Cliente c, Promesa p);
+        bool enAlza(Nombre nt);
+
+    private:
+        Wolfie(const Conj<Cliente>);
+        struct datosCliente{
+            Acciones _acc;
+            Conj<Promesa> _pCompra;
+            Conj<Promesa> _pVenta;
+        };
+
+        struct tupla1{
+            Titulo _titulo;
+            Acciones _cantWolfie;
+            DiccAcot<Cliente, datosCliente> _diccCli;
+        };
+        struct tupla2{
+            Cliente _cliente;
+            Conj<Promesa> _promesas;
+        };
+
+        Conj<Cliente> _clientes;
+        Conj<string> _titulos;
+        DiccT<tupla1> _datosTitulo;
+        DiccAcot<Cliente, Acciones> _accTxCliente;
+        Conj<tupla2> _promUlt;
+
+        DiccAcot<Cliente,datosCliente> crearDiccAccC (DiccAcot<Cliente, Acciones> cs, datosCliente t);
+};
+
+Wolfie::Wolfie(const Conj<Cliente> cl){
+    _accTxCliente=DiccAcot<Cliente,Acciones>(cl.Cardinal());
+    Conj<Cliente>::const_Iterador cs = cl.CrearIt();
+    while (cs.HaySiguiente()) {
+        _clientes.AgregarRapido(cs.Siguiente());
+        _accTxCliente.Definir(cs.Siguiente(),0);
+        cs.Avanzar();
+    } _datosTitulo=DiccT<tupla1>();
+    _titulos=Conj<string>();
+    _promUlt=Conj<tupla2>();
+}
+
+Conj<Cliente>::Iterador Wolfie::Clientes(){
+    return (_clientes.CrearIt());
+}
+//DiccT<Titulo>::Iterador Wolfie::Titulos(){}
+
+Conj<Promesa>::Iterador Wolfie::promesasDe(Cliente c){
+    Conj<Promesa> prom;
+    Conj<Promesa>::Iterador res;
+    if (_promUlt.EsVacio() && (_promUlt.CrearIt().Siguiente()._cliente == c )) {
+        Conj<Nombre>::Iterador t = _titulos.CrearIt();
+        while (t.HaySiguiente()) {
+            datosCliente datosCli = _datosTitulo.Significado(t.Siguiente())._diccCli.Significado(c);
+            if (!datosCli._pCompra.EsVacio()) {
+                prom.AgregarRapido((datosCli._pCompra.CrearIt()).Siguiente()) ;
+            }
+            if (!datosCli._pVenta.EsVacio()) {
+                prom.AgregarRapido((datosCli._pVenta.CrearIt()).Siguiente()) ;
+            }
+            t.Avanzar();
+        }
+        res = prom.CrearIt();
+        _promUlt = Conj<tupla2>();
+        tupla2 a;
+        a._cliente=c;
+        a._promesas=prom;
+        _promUlt.AgregarRapido(a);
+    } else {
+        Conj<Promesa> a =_promUlt.CrearIt().Siguiente()._promesas;
+        res=a.CrearIt();
+    } return res;
+}
+
+Nat Wolfie::accionesPorCliente(Cliente c, Nombre nt) {
+    DiccAcot<Cliente, datosCliente> datoCli=_datosTitulo.Significado(nt)._diccCli;
+    return datoCli.Significado(c)._acc;
+}
+Wolfie Wolfie::inaugurarWolfie (Conj<Cliente> cl) {
+    return Wolfie(cl);
+}
+void Wolfie::agregarTitulo(Titulo t) {
+    Titulo t2 = t.nuevoT(t.nombre(),t.cot(),t.cantmax());
+    _titulos.AgregarRapido(t.nombre());
+    datosCliente a;
+    a._acc=0;
+    a._pCompra=Conj<Promesa>();
+    a._pVenta=Conj<Promesa>();
+    tupla1 b;
+    b._titulo=t2;
+    b._cantWolfie=0;
+    b._diccCli=crearDiccAccC(_accTxCliente, a);
+    _datosTitulo.Definir(t2.nombre(), b);
+}
+
+/*DiccAcot<Cliente,datosCliente> CrearDiccAccC(DiccAcot<Cliente,Acciones> cs, datosCliente t) {
+    DiccAcot<Cliente,Acciones>::Iterador c=cs.CrearIt();
+    while (cs.HaySiguiente()) {
+            res.DefinirRapido(cs.Siguiente(),t);
+            cs.Avanzar();
+    }
+}*////tira error porque datosCliente es privado
+
+DiccAcot<Cliente,Wolfie::datosCliente> Wolfie::crearDiccAccC (DiccAcot<Cliente, Acciones> cs, datosCliente t){
+    DiccAcot<Cliente,Wolfie::datosCliente> res=DiccAcot<Cliente,Wolfie::datosCliente> (cs.CantClaves());
+    typename DiccAcot<Cliente,Acciones>::Iterador c = cs.CrearIt();
+     while (c.HaySiguiente()) {
+        ///res.DefinirRapido(c.Siguiente().clave,t);
+        c.Avanzar();
+    } return res;
+}
+
+struct tuplaCA{
+    Cliente cliente;
+    Acciones acciones;
+};
+//a terminar mergesort !
+void Mergesort(Arreglo<tuplaAC> a){
+    if (a.Tamanho()>1) {
+        Nat m = (a.Tamanho())/2;
+        void mergesort(int *a, int*b, int low, int high)
+{
+    int pivot;
+    if(low<high)
+    {
+        pivot=(low+high)/2;
+        mergesort(a,b,low,pivot);
+        mergesort(a,b,pivot+1,high);
+        Merge(a,b,low,pivot,high);
+    }
+}
+void Merge(int *a, int *b, int low, int pivot, int high)
+{
+    int h,i,j,k;
+    h=low;
+    i=low;
+    j=pivot+1;
+
+    while((h<=pivot)&&(j<=high))
+    {
+        if(a[h]<=a[j])
+        {
+            b[i]=a[h];
+            h++;
+        }
+        else
+        {
+            b[i]=a[j];
+            j++;
+        }
+        i++;
+    }
+    if(h>pivot)
+    {
+        for(k=j; k<=high; k++)
+        {
+            b[i]=a[k];
+            i++;
+        }
+    }
+    else
+    {
+        for(k=h; k<=pivot; k++)
+        {
+            b[i]=a[k];
+            i++;
+        }
+    }
+    for(k=low; k<=high; k++) a[k]=b[k];
+}
+    }
+}
+
+Arreglo<tuplaAC> DiccAcot2ArrayOrd (DiccAcot<Cliente,Acciones> d) {
+    Nat i=0;
+    DiccAcot<Cliente,Acciones>::Iterador di =d.CrearIt();
+    Arreglo<tuplaAC> arr=Arreglo<tuplaAC>(d.CantClaves());
+    while (i<d.CantClaves()) {
+        arr[i].cliente = di.SiguienteClave();
+        arr[i].acciones = di.SiguienteSignificado();
+        i++;
+        di.Avanzar();
+    } Mergesort(arr);
+    return arr;
+}
+
+void Wolfie::actualizarCotizacion(Nombre nt, Nat cot){
+    /// acá estoy usando lenguaje de diseño, o sea que paso los tipos no básicos por referencia
+    /// como esta cosa es C, eso no funciona y seguramente tnegamos que volver a asignar dCli y datos
+    /// espero que no rompa complejidades
+    tupla1 datos=_datosTitulo.Significado(nt);
+    ///datos._titulo=datos._titulo.recotizar(cot); (falta operador = de titulo)
+    DiccAcot<Cliente,datosCliente>::Iterador itDiccCli=datos._diccCli.CrearIt();
+    while (itDiccCli.HaySiguiente()) {
+        datosCliente dcli=itDiccCli.SiguienteSignificado();
+        Cliente c=itDiccCli.SiguienteClave();
+        if (dcli._pVenta.Cardinal()>0) {
+          Promesa pv=dcli._pVenta.CrearIt().Siguiente();
+          if (pv.promesaEjecutable(cot,datos._titulo.cantmax()-datos._cantWolfie)) {
+            _accTxCliente.Significado(c)=_accTxCliente.Significado(c)-pv.cantidad();
+            dcli._acc=dcli._acc-pv.cantidad();
+            dcli._pVenta=Conj<Promesa>();
+            _promUlt=Conj<tupla2>();
+          }
+        } itDiccCli.Avanzar();
+    }
+<<<<<<< .mine
+    Arreglo<tupla3> cliO = this->DiccAcot2ArrOrd(_accTxCliente);
+=======
+    Arreglo<tuplaAC> cliO; ///Tira error por algún motivo: = DiccAcot2ArrOrd(_accTxCliente);
+>>>>>>> .r155
+    Nat i = 0;
+    while (i<cliO.Tamanho()) {
+        /// Cliente c = datos._diccCli.SiguienteClave(); Creo que esto está mal en el TP
+        Cliente c=cliO[i].cliente;
+        datosCliente dcli = datos._diccCli.Significado(c);
+        if (dcli._pCompra.Cardinal()>0) {
+          Promesa pc=dcli._pCompra.CrearIt().Siguiente();
+          if (pc.promesaEjecutable(cot,datos._titulo.cantmax()-datos._cantWolfie)) {
+            _accTxCliente.Significado(c)=_accTxCliente.Significado(c)+pc.cantidad();
+            dcli._acc=dcli._acc+pc.cantidad();
+            dcli._pCompra=Conj<Promesa>();
+            _promUlt=Conj<tupla2>();
+          }
+        } i++;
+    }
+}
+void Wolfie::agregarPromesa(Cliente c, Promesa p){
+    datosCliente datos = (_datosTitulo.Significado(p.titulo())._diccCli.Significado(c));
+    if (p.tipo()==vender) {
+        datos._pVenta.AgregarRapido(p);
+    } else {
+        datos._pCompra.AgregarRapido(p);
+    } if (!(_promUlt.EsVacio()) && (_promUlt.CrearIt().Siguiente()._cliente==c)) {
+        Conj<Promesa> b=_promUlt.CrearIt().Siguiente()._promesas;
+        b.AgregarRapido(p); //Juntar esto me tira que discardea qualifiers
+    }
+}
+bool Wolfie::enAlza(Nombre nt){
+    return _datosTitulo.Significado(nt)._titulo.enalza();
+}

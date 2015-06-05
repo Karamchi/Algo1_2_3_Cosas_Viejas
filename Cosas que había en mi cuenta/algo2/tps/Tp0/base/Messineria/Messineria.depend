@@ -1,0 +1,118 @@
+# depslib dependency file v1.0
+1398112453 source:/home/martin/Documentos/Guias_Facultad/Algoritmos II/Tp0/Messineria/base/tests.cpp
+	"mini_test.h"
+	"messineria.h"
+
+1398183261 a.h"
+
+1397589358 /home/martin/Documentos/Guias_Facultad/Algoritmos II/Tp0/Messineria/base/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1398165049 >
+
+1398112690 /home/martin/Documentos/Guias_Facultad/Algoritmos II/Tp0/Messineria/base/messineria.h
+	<iostream>
+	<cassert>
+
+1398897185 
+
+1398017284 source:/home/martin/Documentos/Guias_Facultad/Algoritmos II/Tp0/Messineria/base/mesineria.cpp
+	"messineria.h"
+
+1398017284 /home/martin/Documentos/Guias_Facultad/Algoritmos II/Tp0/Messineria/base/mesineria.cpp
+	"messineria.h"
+
+1398183261 source:/home/mefosco/Escritorio/Tp0/Messineria/base/tests.cpp
+	"mini_test.h"
+	"messineria.h"
+
+1398180100 /home/mefosco/Escritorio/Tp0/Messineria/base/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1398183396 /home/mefosco/Escritorio/Tp0/Messineria/base/messineria.h
+	<iostream>
+	<cassert>
+
+1398709988 source:c:\javi\uba\algo 2\tp0\messineria\base\tests.cpp
+	"mini_test.h"
+	"messineria2.h"
+
+1398897185 a2.h"
+
+1398908181 c:\javi\uba\algo 2\tp0\messineria\base\mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1398265135 c:\javi\uba\algo 2\tp0\messineria\base\messineria.h
+	<iostream>
+	<cassert>
+
+1398889008 source:/home/jminces/algo2/TP1/tp0NOBORRAR/Tp0/Messineria/base/tests.cpp
+	"mini_test.h"
+	"messineria.h"
+	"mini_test.h"
+	"messineria2.h"
+
+1398183921 /home/jminces/algo2/TP1/tp0NOBORRAR/Tp0/Messineria/base/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+	<iostream>
+	<sstream>
+	<exception>
+
+1398284639 /home/jminces/algo2/TP1/tp0NOBORRAR/Tp0/Messineria/base/messineria.h
+	<iostream>
+	<cassert>
+
+1398736395 source:/home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/tests.cpp
+	"mini_test.h"
+	"messineria2.h"
+
+1398165049 /home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1398736395 /home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/messineria2.h
+	<iostream>
+	<cassert>
+
+1398912202 source:c:\javi\uba\algo 2\tp0\messineria\base\tests-1.cpp
+	"mini_test.h"
+	"messineria2.h"
+
+1398914846 c:\javi\uba\algo 2\tp0\messineria\base\messineria2.h
+	<iostream>
+	<cassert>
+
+1398897185 /home/jminces/algo2/TP1/tp0NOBORRAR/Tp0/Messineria/base/messineria2.h
+	<iostream>
+	<cassert>
+
+1398897185 source:/home/jminces/algo2/TP1/tp0NOBORRAR/Tp0/Messineria/base/tests-1.cpp
+	"mini_test.h"
+	"messineria2.h"
+
+1400101780 source:/home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/tests-1.cpp
+	"mini_test.h"
+	"messineria2.h"
+
+1398165049 /home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1400104063 /home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/messineria2.h
+	<iostream>
+	<cassert>
+
+1400103969 source:/home/martin/algo2/tp0NOBORRAR/Tp0/Messineria/base/tests-profes.cpp
+	"mini_test.h"
+	"messineria2.h"
+

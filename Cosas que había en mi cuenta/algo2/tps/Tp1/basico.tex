@@ -1,0 +1,229 @@
+\documentclass[10pt, a4paper]{article}
+\usepackage[paper=a4paper, left=1.5cm, right=1.5cm, bottom=1.5cm, top=3.5cm]{geometry}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{latexsym}
+\usepackage{lastpage}
+\usepackage{aed2-symb,aed2-itef,aed2-tad}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage{calc}
+%\usepackage[utf8]{inputenc} % para poder usar tildes en archivos UTF-8
+%\usepackage{a4wide} % márgenes un poco más anchos que lo usual
+\usepackage[conEntregas]{caratula}
+
+\newcommand{\f}[1]{\text{#1}}
+\renewcommand{\paratodo}[2]{$\forall~#2$: #1}
+
+\sloppy
+
+\hypersetup{%
+ % Para que el PDF se abra a p\'{a}gina completa.
+ pdfstartview= {FitH \hypercalcbp{\paperheight-\topmargin-1in-\headheight}},
+ pdfauthor={C\'{a}tedra de Algoritmos y Estructuras de Datos II - DC - UBA},
+ pdfkeywords={TADs b\'{a}sicos},
+ pdfsubject={Tipos abstractos de datos b\'{a}sicos}
+}
+
+\parskip=5pt % 10pt es el tamaño de fuente
+
+% Pongo en 0 la distancia extra entre \'{\'{i}}temes.
+\let\olditemize\itemize
+\def\itemize{\olditemize\itemsep=0pt}
+
+% Acomodo fancyhdr.
+\pagestyle{fancy}
+\thispagestyle{fancy}
+\addtolength{\headheight}{1pt}
+\lhead{Algoritmos y Estructuras de Datos II}
+\rhead{$1^{\mathrm{er}}$ cuatrimestre de 2012}
+\cfoot{\thepage /\pageref{LastPage}}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+
+\titulo{Trabajo Pr\'{a}ctico}
+\subtitulo{}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructura de Datos II}
+\grupo{Grupo 13}
+
+\integrante{Fosco, Martin Esteban}{449/13}{mfosco2005@yahoo.com.ar}
+\integrante{Minces M\"{u}ller, Javier Nicol\'{a}s}{231/13}{javijavi1994@gmail.com}
+\integrante{Murga, Christian Mariano}{982/12}{christian.murga@underverse.com.ar}
+\integrante{Palladino, Julian Alberto }{336/13}{julianpalladino@hotmail.com}
+% Pongan cuantos integrantes quieran
+
+\maketitle
+
+
+\begin{tad}{{\tadNombre{Cliente}}}
+\tadGeneros{cliente}
+Cliente es Nat
+\end{tad}
+
+\begin{tad}{{\tadNombre{Dinero}}}
+\tadGeneros{dinero}
+Dinero es Nat
+\end{tad}
+
+\begin{tad}{{\tadNombre{TipoOp}}}
+\tadGeneros{tipoop}
+TipoOp es ENUM\{Compra, Venta\}
+\end{tad}
+
+\begin{tad}{{\tadNombre{T\'{i}tulo}}}
+\tadGeneros{t\'{i}tulo}
+\tadExporta{t\'{i}tulo,\ observadores\ generadores,\ AlaAlza}
+\tadUsa{\tadNombre{string,\ dinero,\ Nat,\ bool}}
+\tadIgualdadObservacional{ta}{tb}{t\'{i}tulo}{(Nombre(ta)\ $\igobs$\ Nombre(tb))\ $\wedge$\\ (Cotizaci\'{o}n(ta)\ $\igobs$\ Cotizaci\'{o}n(tb))\ $\wedge$\\ (CantMax(ta)\ $\igobs$\ CantMax(tb))\ $\wedge$\\ (AlaAlza(ta)\ $\igobs$\ AlaAlza(tb))}
+\tadObservadores
+\tadOperacion{Nombre}{t\'{i}tulo}{string}{}
+\tadOperacion{Cotizaci\'{o}n}{t\'{i}tulo}{dinero}{}
+\tadOperacion{CantMax}{t\'{i}tulo}{nat}{}
+\tadOperacion{AlaAlza}{t\'{i}tulo}{bool}{}
+\tadGeneradores
+\tadOperacion{CrearT\'{i}tulo}{string \ $\times$ \ dinero \ $\times$ \ nat}{t\'{i}tulo}{}
+\tadOperacion{CambioCotizaci\'{o}n}{t\'{i}tulo \ $\times$\ dinero}{t\'{i}tulo}{}
+\tadOtrasOperaciones
+\tadAxiomas
+\tadAxioma{Nombre(CrearT\'{i}tulo(n,\ i,\ disp))}{n}
+\tadAxioma{Nombre(CambioCotizaci\'{o}n(t,\ n))}{Nombre(t)}
+\tadAxioma{Cotizaci\'{o}n(CrearT\'{i}tulo(n,\ i,\ disp))}{i}
+\tadAxioma{Cotizaci\'{o}n(CambioCotizaci\'{o}n(t,\ n))}{t}
+\tadAxioma{AlaAlza(CrearT\'{i}tulo)}{true}{}
+\tadAxioma{AlaAlza(CambioCotizaci\'{o}n(t,\ n))}{n\ >\ Cotizaci\'{o}n}
+\tadAxioma{CantMax(CrearT\'{i}tulo(n,\ i,\ disp))}{disp}
+\tadAxioma{CantMax(CambioCotizaci\'{o}n(t,\ n))}{CantMax(t)}
+
+
+\end{tad}
+
+
+\begin{tad}{{\tadNombre{Promesa}}}
+\tadGeneros{promesa}
+\tadExporta{promesa,\ observadores,\ generadores,\ promtitulo,\ promCli,\ sumaCant}
+\tadUsa{\tadNombre{tipoop,\ dinero,\ string,\ Nat,\ cliente,\ conjunto($\alpha$)}}
+\tadIgualdadObservacional{pa}{pb}{promesa}{(tipo(pa)\ $\igobs$\ tipo(pb))\ $\wedge$\\ (t\'{i}tulo(ta)\ $\igobs$\ t\'{i}tulo(tb))\ $\wedge$\\ (cantidad(ta)\ $\igobs$\ cantidad(tb)) $\wedge$\\ (umbral(ta)\ $\igobs$\ umbral(tb)) $\wedge$\\ (cliente(ta)\ $\igobs$\ cliente(tb))}
+\tadObservadores
+\tadOperacion{tipo}{promesa}{tipoop}{}
+\tadOperacion{t\'{i}tulo}{promesa}{string}{}
+\tadOperacion{cantidad}{promesa}{nat}{}
+\tadOperacion{umbral}{promesa}{dinero}{}
+\tadOperacion{cliente}{promesa}{cliente}{}
+\tadGeneradores
+\tadOperacion{NuevaPromesa}{tipoop\  $\times$\  string\   $\times$\  nat\  $\times$\  dinero $\times$\ cliente}{promesa}{}
+\tadOtrasOperaciones
+\tadOperacion{promtitulo}{conj(promesa)\ $\times$\ string}{conj(promesa)}{}
+\tadOperacion{promCli}{conj(promesa)\ $\times$\ cliente}{conj(promesa)}{}
+\tadOperacion{sumaCant}{conj(promesa)}{nat}{}
+\tadOperacion{promEjecutable}{promesa\ p\ $\times$\ dinero\ $\times$\ nat}{bool}{}
+\tadAxiomas
+\tadAxioma{promtitulo(ps,\ s)}{\IF $\emptyset$?(ps) THEN $\emptyset$ ELSE {\IF titulo(dameUno(ps))=s THEN Ag(dameUno(ps),promtitulo(sinUno(ps),\ t)) ELSE promtitulo (sinUno(ps),\ s) FI} FI}
+\tadAxioma{promCli(ps,\ c)}{\IF $\emptyset$?(ps) THEN $\emptyset$ ELSE {\IF cliente(dameUno(ps))\ =\ c THEN Ag(dameUno(ps),\ promCli(sinUno(ps),\ c)) ELSE promCli (sinUno(ps),\ c) FI} FI}
+\tadAxioma{sumaCant(ps)}{\IF $\emptyset$?(ps) THEN 0 ELSE {\IF tipo(dameUno(ps))\ =\ compra THEN sumaCant(sinUno(ps))\ +\ cantidad(dameUno(ps)) ELSE sumaCant(sinUno(ps))\ -\ cantidad(dameUno(ps)) FI} FI}
+\tadAxioma{promEjecutable(p,\ d,\ n)}{((tipo(p)\ =\ compra)\ $\wedge$\ (cantidad(p)\ 	<\ n)\ $\wedge$\ (umbral(p)\ <\ d))\ $\vee$\ ((tipo(p)\ =\ venta)\ $\wedge$\ (umbral(p)\ >\ d))}
+
+\end{tad}
+
+\begin{tad}{{\tadNombre{Broker}}}
+\tadGeneros{broker}
+\tadExporta{broker,\ observadores,\ generadores,\ AccClientes,\ AccBroker,\ promEjecutable,\ filtrar,\ promFiltradas}
+\tadUsa{\tadNombre{conjunto(clave),\ cliente,\ titulo,\ promesa,\ nat}}
+\tadIgualdadObservacional{ba}{bb}{broker}{(T\'{i}tulos(ba)\ $\igobs$\ T\'{i}tulos(bb))\ $\wedge$\\ (Clientes(ba)\ $\igobs$\ Clientes(bb))\ $\wedge$\\ ($\forall$ c $\in$ clientes(ba))($\forall$ t $\in$ titulos(ba))\ (AccCliente(ba,\ c,\ nombre(t))\ $\igobs$ AccCliente(bb,\ c,\ nombre(t))) $\wedge$\\ ($\forall$ c $\in$ clientes(ba)) Concretadas(ba,\ c) $\igobs$ Concretadas(bb,c)}
+\tadObservadores
+
+
+\tadOperacion{T\'{i}tulos}{broker}{conj(t\'{i}tulo)}{}
+\tadOperacion{Clientes}{broker}{conj(cliente)}{}
+\tadOperacion{Promesas}{broker\ b}{conj(promesa)}{}
+\tadOperacion{AccCliente}{broker\ b\ $\times$\ cliente\ c\ $\times$\ string\ s}{nat}{c\ $\in$ \ Clientes(b) $\wedge$ s $\in$ nombres(titulos(b))}
+\tadOperacion{Concretadas}{broker\ b,\ cliente\ c}{nat}{c $\in$ Clientes(b)}
+\tadGeneradores
+
+
+\tadOperacion{NuevoBroker}{}{broker}{}
+\tadOperacion{AgCliente}{cliente\ c\ $\times$\ broker\ b}{broker}{c $\notin$ clientes(b)}
+\tadOperacion{AgT\'{i}tulo}{broker\ b\ $\times$\ t\'{i}tulo\ t}{broker}{nombre(t)\ $\notin$\ nombres(t\'{i}tulos(b))}
+\tadOperacion{AgPromesa}{broker\ b\ $\times$\ promesa\ p}{broker}{(titulo(p)\ $\in$\ nombres(titulos(b)))\ $\wedge$\ (cliente(p)\ $\in$\ clientes(b))\ $\yluego$ \\ (noDeEseTipo(b,p) $\wedge$ ((tipo(p)=compra) $\wedge$ cantidad(p)\ $\leq$\ cantMax(titNom(b,\ t\'{i}tulo(p)))\ $\vee$\ ((tipo(p)=venta)\ $\wedge$\ cantidad(p)\ >\ accCliente(b,\ cliente(p),\ titulo(p)))))}
+
+\tadOperacion{CambiarCot}{broker\ b\ $\times$\ t\'{i}tulo\ t\ $\times$\ dinero\ n}{broker}{t $\in$ titulos(b)}
+\tadOperacion{ElimPromesa}{broker\ b\ $\times$\ promesa\ p}{broker}{p $\in$\ promesas (b)}
+\tadOtrasOperaciones
+
+
+\tadOperacion{AccClientes}{broker\ b\ $\times$\ conj(cliente)\ c\ $\times$\ string\ s}{nat}{s\ $\in$\ nombres(t\'{i}tulos(b))\ $\wedge$\ c\ $\subseteq$\ Clientes(b)}
+\tadOperacion{AccBroker}{broker\ b\ $\times$\ string\ s}{nat}{s\ $\in$\ nombres(t\'{i}tulos(b))}
+\tadOperacion{noDeEseTipo}{broker\ $\times$\ promesa}{bool}{}
+
+\tadOperacion{filtrar}{broker\ b\ $\times$\ conj(promesa)\ ps\ $\times$\ dinero\ d\ $\times$\ nat\ n}{conj(promesa)}{ps\ $\subseteq$\ promesas(b)}
+\tadOperacion{promFiltradas}{broker\ b\ $\times$\ conj(promesa)\ ps\ $\times$\ dinero\ d\ $\times$\ nat\ n}{conj(promesa)}{ps\ $\subseteq$\ promesas(b)}
+\tadOperacion{maxConcretadas}{broker\ b\ $\times$\ conj(cliente)\ cs}{nat}{cs\ $\subseteq$\ clientes (b)\  $\wedge$\  $\neg$ $\emptyset$?(cs)}
+\tadOperacion{losMayores}{broker\ b\ $\times$\ conj(cliente)\ cs}{conj(cliente)}{$\neg$ $\emptyset$?(Clientes(b))}
+\tadOperacion{clientesMasFieles}{broker\ b}{conj(cliente)}{$\neg$ $\emptyset$?(Clientes(b))}
+\tadOperacion{titNom}{broker\ b\ $\times$\ string\ s}{t\'{i}tulo}{s\ $\in$\ nombres(T\'{i}tulos(b))}
+\tadOperacion{TN}{conj(t\'{i}tulo)\ $\times$\ string}{t\'{i}tulo}{}
+\tadOperacion{nombres}{conj(t\'{i}tulo)}{conj(string)}{}
+
+\tadAxiomas
+\tadAxioma{T\'{i}tulos(NuevoBroker))}{$\emptyset$}
+\tadAxioma{T\'{i}tulos(AgCliente(b,\ c))}{T\'{i}tulos(b)}
+\tadAxioma{T\'{i}tulos(AgT\'{i}tulo(b,\ t))}{Ag(t,\ T\'{i}tulos(b))}
+\tadAxioma{T\'{i}tulos(AgPromesa(b,\ p))}{T\'{i}tulos(b)}
+\tadAxioma{T\'{i}tulos(CambiarCot(b,\ t,\ n))}{Ag(cambioCotizaci\'{o}n(t,\ n),\ Titulos(b)\ -\ $\{$t$\}$)}
+\tadAxioma{T\'{i}tulos(ElimPromesa(b,\ p)}{T\'{i}tulos(b)}
+\tadAxioma{Clientes (NuevoBroker)} {$\emptyset$}
+\tadAxioma{Clientes (AgCliente(b,\ c))} {Ag(c,\ Clientes(b))}
+\tadAxioma{Clientes (AgT\'{i}tulo(b,\ t))} {Clientes(b))}
+\tadAxioma{Clientes(AgPromesa(b,\ p))}{Clientes(b)}
+\tadAxioma{Clientes (CambiarCot(b,\ t,\ n))} {Clientes(b)}
+\tadAxioma{Clientes(ElimPromesa(b,\ p)}{Clientes(b)}
+\tadAxioma{Promesas(NuevoBroker)}{$\emptyset$}
+\tadAxioma{Promesas(AgCliente(b,\ c))}{Promesas(b)}
+\tadAxioma{Promesas(AgT\'{i}tulo(b,\ t))}{Promesas(b)}
+\tadAxioma{Promesas(AgPromesa(b,\ p))}{promFiltradas(b,\ Ag(p,\ Promesas(b)),\ Cotizaci\'{o}n(titNom(b,\ t\'{i}tulo(p))),\ cantMax(t)\ -\ AccBroker(b,\ t))}
+\tadAxioma{Promesas(CambiarCot(b,\ t,\ n))}{promFiltradas(b,\ promtitulo(promesas(b),\ Nombre(t)),\ n,\ cantMax(t)\ -\ AccBroker(b,\ Nombre(t)))}
+\tadAxioma{Promesas(ElimPromesa(b,\ p))}{Promesas(b)-\{p\}}
+\tadAxioma{AccCliente(AgCliente(b,\ c),\ cs,\ t)}{\IF (c\ =\ cs) THEN (0) ELSE (AccCliente(b,\ cs,\ t)) FI}
+\tadAxioma{AccCliente(AgT\'{i}tulo(b,\ t),\ c,\ ts)}{\IF (t\ =\ ts) THEN (0) ELSE (AccCliente(b,\ c,\ ts)) FI}
+\tadAxioma{AccCliente(AgPromesa(b,\ p),\ s)}{AccCliente(b,\ cliente(p),\ s)+\IF titulo(p)=s THEN
+ sumacant(promCli(Promesas(b)\ -\ promFiltradas(b,\ Ag(p,\ Promesas(b),\ Cotizaci\'{o}n(titNom(t\'{i}tulo(p))),\ AccBroker(b,\ s)),\ cliente(p)))) ELSE 0 FI}
+
+\tadAxioma{AccCliente(CambiarCot(b,\ t,\ n),\ c,\ ss)}{\IF Nombre(t)=ss THEN AccCliente(b,\ c,\ Nombre(t))\ +\ sumacant(promCli(promtitulo(Promesas(b)\ -\ promFiltradas(b,\ Promesas(b),\ cantMax(t)\ -\ AccBroker(b,\ Nombre(t)))),\ Nombre(t)),\ c) ELSE AccCliente(b,\ c,\ ss) FI}
+\tadAxioma{AccCliente(ElimPromesa(b,\ p),\ s2,\ c)}{AccCliente(b,\ s2,\ c)}
+
+\tadAxioma{Concretadas(AgCliente(b,\ c),\ cs)}{\IF c=cs THEN 0 ELSE Concretadas (b,\ cs) FI}
+\tadAxioma{Concretadas(AgT\'{i}tulo(b,\ t),\ c)}{Concretadas(b,\ c)}
+\tadAxioma{Concretadas(AgPromesa(b,\ c,\ p),\ cs)}{\IF c=cs THEN {Concretadas (b,\ c)+$\#$(PromCli(promesas(b)\ -\ promFiltradas(b,\ Ag(p,\ promesas(b)),\ cotizacion(titNom(b,\ titulo(p))),\ cantMax(titNom(b,\ titulo(p))))),\ c)} ELSE Concretadas (b,\ cs) FI}
+\tadAxioma{Concretadas(CambiarCot(b,\ t,\ n),\ c)}{Concretadas(b,\ c)+$\#$(PromCli(promFiltradas(b,\ promesas(b),\ n,\ cantMax(t)-AccBroker(b,\ Nombre(t)))),\ c)}
+\tadAxioma{Concretadas(ElimPromesa(b,\ p),\ c)}{Concretadas (b,\ c)}
+
+
+\tadAxioma{AccClientes(b,\ cs,\ t)}{\IF $\emptyset$?(cs) THEN 0 ELSE AccCliente(dameUno(cs))+AccClientes(b,\ sinUno(cs),\ t) FI}
+\tadAxioma{AccBroker(b,\ t)}{AccClientes(b,\ Clientes(b),\ t)}
+\tadAxioma{noDeEseTipo(b,\ p)}{$\emptyset$?(promCli(promtitulo(Promesas(b),\ titulo(p)),\ cliente(p)))) $\oluego$ ($\#$(promCli(promtitulo(Promesas(b),\ titulo(p)),\ cliente(p))))=1 $\wedge$ tipo(dameUno(promCli(promtitulo(Promesas(b),\ titulo(p)),\ cliente(p)))) $\neq$ tipo(p))}
+\tadAxioma{filtrar(b,\ ps,\ d,\ n)}{\IF($\neg$ $\emptyset$?(ps)) THEN{\IF($\neg$promEjecutable(dameUno(ps),\ d,\ n)) THEN filtrar(b,\ sinUno(ps),\ d,\ n)) ELSE {\IF (tipo(dameUno(ps))\ =\ compra) THEN Ag(dameUno(ps),\ filtrar(b,\ sinUno(ps),\ d,\ n\ -\ cantidad(p))) ELSE Ag(dameUno(ps),\ filtrar(b,\ sinUno(ps),\ d,\ n\ +\ cantidad(p))) FI} FI} ELSE $\emptyset$ FI}
+\tadAxioma{promFiltradas(b,\ ps,\ d,\ n)}{\IF($\emptyset$?(filtrar(b,\ ps,\ d,\ n))) THEN ps ELSE promFiltradas(b,\ ps\ -\ filtrar(b,\ ps,\ d,\ n),\ d,\ n\ -\ sumacant(filtrar(b,\ ps,\ d,\ n))) FI}
+\tadAxioma{maxConcretadas(b,\ cs)} {\IF $\#$(cs) = 1 THEN Concretadas(dameUno(cs)) ELSE {\IF Concretadas(b,dameUno(cs))\ $\geq$\ Concretadas(b,dameUno(sinUno(cs))) THEN maxConcretadas(b,Ag(dameUno(cs),\ sinUno(sinUno(cs))) ELSE maxConcretadas(b,\ Ag(dameUno(sinUno(cs)),\ sinUno(sinUno(cs)) FI} FI} 
+\tadAxioma{ClientesMasFieles(b)}{losMayores(b,\ Clientes(b))}
+\tadAxioma{losMayores(b,\ cs)}{\IF $\emptyset$?(cs) THEN $\emptyset$ ELSE {\IF (concretadas(b,\ dameUno(cs))) = maxConcretadas(b,\ cs) THEN Ag(dameUno(cs),losMayores(b,sinUno(cs))) ELSE losMayores(b,sinUno(cs)) FI} FI}
+\tadAxioma{titNom(b,\ s)}{TN(T\'{i}tulos(b),\ s)}
+\tadAxioma{TN(ts,\ n)}{\IF Nombre(dameUno(ts))\ =\ n THEN dameUno(ts) ELSE TN(sinUno(ts),\ n) FI}
+\tadAxioma{nombres(ts)}{\IF ts\ =\ $\emptyset$ THEN $\emptyset$ ELSE Ag(Nombre(dameUno(ts)),\ nombres(sinUno(ts))) FI}
+
+\end{tad}
+\newpage
+\section{Decisiones Tomadas}
+En el recuperatorio se tomaron las siguientes decisiones:\\
+\\
+1) Las promesas de venta que superan la cantidad de acciones que tiene el cliente directamente no se permiten. Tampoco se permiten promesas de compra que superen la cantidad m\'{a}xima del broker.\\
+\\
+2) Cada cliente puede tener, por t\'{i}tulo, una promesa de compra y una de venta. Un cliente no puede hacer una promesa si ya tiene una promesa de ese tipo y t\'{i}tulo.\\
+\\
+3) Creamos la funci\'{o}n promFiltradas para poder ejecutar todas las promesas que sean ejecutables en un determinado momento en lugar de hacerlo una por una porque no afecta la distribuci\'{o}n de acciones al final de la operaci\'{o}n. \\
+
+\end{document}

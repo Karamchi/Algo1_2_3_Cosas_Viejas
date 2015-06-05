@@ -1,0 +1,2261 @@
+\documentclass[spanish,a4paper]{article}
+
+% Paquetes generales
+\usepackage{ifthen}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage[absolute]{textpos}
+
+%%%%%%%%%%%%%%%%%%%%%%%% TWEAKLIST.STY %%%%%%%%%%%%%%%%%%%%%%%%
+%% Esto esta copiado de tweaklist.sty, un paquete que encontré en la
+%% web. Define hooks que se ejecutan cada vez que se invoca
+%% determinado environment (itemhook, enumhook y descripthook
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\def\enumhook{}
+% \def\enumhooki{}\def\enumhookii{}\def\enumhookiii{}
+% \def\enumhookiv{}\def\itemhook{}\def\itemhooki{}\def\itemhookii{}
+% \def\itemhookiii{}\def\itemhookiv{}\def\descripthook{}
+\def\enumerate{%
+  \ifnum \@enumdepth >\thr@@\@toodeep\else
+    \advance\@enumdepth\@ne
+    \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+      \expandafter
+      \list
+        \csname label\@enumctr\endcsname
+        {\usecounter\@enumctr\def\makelabel##1{\hss\llap{##1}}%
+          \enumhook \csname enumhook\romannumeral\the\@enumdepth\endcsname}%
+  \fi}
+% En las practicas usamos numeros arabigos para los ejercicios.
+% Aca cambiamos los enumerate comunes para que usen letras y numeros
+% romanos
+\newcommand{\arreglarincisos}{%
+  \renewcommand{\theenumi}{\alph{enumi}}
+  \renewcommand{\theenumii}{\roman{enumii}}
+  \renewcommand{\labelenumi}{\theenumi)}
+  \renewcommand{\labelenumii}{\theenumii)}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARCIAL %%%%%%%%%%%%%%%%%%%%%
+\let\@xa\expandafter
+\newcommand{\tituloparcial}{\centerline{\depto -- \lamateria}
+  \centerline{\elnombre -- \lafecha}%
+  \setlength{\TPHorizModule}{10mm} % Fija las unidades de textpos
+  \setlength{\TPVertModule}{\TPHorizModule} % Fija las unidades de
+                                % textpos
+  \arreglarincisos
+  \newcounter{total}% Este contador va a guardar cuantos incisos hay
+                    % en el parcial. Si un ejercicio no tiene incisos,
+                    % cuenta como un inciso.
+  \newcounter{contgrilla} % Para hacer ciclos
+  \newcounter{columnainicial} % Se van a usar para los cline cuando un
+  \newcounter{columnafinal}   % ejercicio tenga incisos.
+  \newcommand{\primerafila}{}
+  \newcommand{\segundafila}{}
+  \newcommand{\rayitas}{} % Esto va a guardar los \cline de los
+                          % ejercicios con incisos, asi queda mas bonito
+  \newcommand{\anchodegrilla}{20} % Es para textpos
+  \newcommand{\izquierda}{7} % Estos dos le dicen a textpos donde colocar
+  \newcommand{\abajo}{2}     % la grilla
+  \newcommand{\anchodecasilla}{0.4cm}
+  \setcounter{columnainicial}{1}
+  \setcounter{total}{0}
+  \newcounter{ejercicio}
+  \setcounter{ejercicio}{0}
+  \newenvironment{ejercicio}[1]
+  {%
+    \stepcounter{ejercicio}\textbf{Ejercicio \theejercicio. [##1
+      puntos]}% Formato
+    \renewcommand\@currentlabel{\theejercicio}% Esto es para las
+                                % referencias
+    \newcommand{\invariante}[2]{%
+      {\normalfont\bfseries\ttfamily invariante}%
+      \ ####1\hspace{1em}####2%
+    }%
+    \renewcommand{\problema}[5][result]{
+      \encabezadoDeProblema{####1}{####2}{####3}{####4}\hspace{1em}####5}%
+  }% Aca se termina el principio del ejercicio
+  {% Ahora viene el final
+    % Esto suma la cantidad de incisos o 1 si no hubo ninguno
+    \ifthenelse{\equal{\value{enumi}}{0}}
+    {\addtocounter{total}{1}}
+    {\addtocounter{total}{\value{enumi}}}
+    \ifthenelse{\equal{\value{ejercicio}}{1}}{}
+    {
+      \g@addto@macro\primerafila{&} % Si no estoy en el primer ej.
+      \g@addto@macro\segundafila{&}
+    }
+    \ifthenelse{\equal{\value{enumi}}{0}}
+    {% No tiene incisos
+      \g@addto@macro\primerafila{\multicolumn{1}{|c|}}
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\theejercicio}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      
+      \stepcounter{columnainicial}
+    }
+    {% Tiene incisos
+      % Primero ponemos el encabezado
+      \g@addto@macro\primerafila{\multicolumn}% Ahora el numero de items
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\arabic{enumi}}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      % global 
+      % Ahora el formato
+      \g@addto@macro\primerafila{{|c|}}%
+      % Ahora el numero de ejercicio
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\theejercicio}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      % global 
+      % Ahora armamos la segunda fila
+      \g@addto@macro\segundafila{\multicolumn{1}{|c|}{a}}%
+      \setcounter{contgrilla}{1}
+      \whiledo{\value{contgrilla}<\value{enumi}}
+      {%
+        \stepcounter{contgrilla}
+        \g@addto@macro\segundafila{&\multicolumn{1}{|c|}}
+        \bgroup% avoid overwriting somebody else's value of \tmp@a
+        \protected@edef\tmp@a{\alph{contgrilla}}% expand as far as we can
+        \@xa\g@addto@macro\@xa\segundafila\@xa{\tmp@a}%
+        \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+        % global 
+      }
+      % Ahora armo las rayitas
+      \setcounter{columnafinal}{\value{columnainicial}}
+      \addtocounter{columnafinal}{-1}
+      \addtocounter{columnafinal}{\value{enumi}}
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\noexpand\cline{%
+          \thecolumnainicial-\thecolumnafinal}}%
+      \@xa\g@addto@macro\@xa\rayitas\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      \setcounter{columnainicial}{\value{columnafinal}}
+      \stepcounter{columnainicial}
+    }
+    \setcounter{enumi}{0}%
+    \vspace{0.2cm}%
+  }%
+  \newcommand{\tercerafila}{}
+  \newcommand{\armartercerafila}{
+    \setcounter{contgrilla}{1}
+    \whiledo{\value{contgrilla}<\value{total}}
+    {\stepcounter{contgrilla}\g@addto@macro\tercerafila{&}}
+  }
+  \newcommand{\grilla}{%
+    \g@addto@macro\primerafila{&\textbf{TOTAL}}
+    \g@addto@macro\segundafila{&}
+    \g@addto@macro\tercerafila{&}
+    \armartercerafila
+    \ifthenelse{\equal{\value{total}}{\value{ejercicio}}}
+    {% No hubo incisos
+      \begin{textblock}{\anchodegrilla}(\izquierda,\abajo)
+        \begin{tabular}{|*{\value{total}}{p{\anchodecasilla}|}c|}
+          \hline
+          \primerafila\\
+          \hline
+          \tercerafila\\
+          \tercerafila\\
+          \hline
+        \end{tabular}
+      \end{textblock}
+    }
+    {% Hubo incisos
+      \begin{textblock}{\anchodegrilla}(\izquierda,\abajo)
+        \begin{tabular}{|*{\value{total}}{p{\anchodecasilla}|}c|}
+          \hline
+          \primerafila\\
+          \rayitas
+          \segundafila\\
+          \hline
+          \tercerafila\\
+          \tercerafila\\
+          \hline
+        \end{tabular}
+      \end{textblock}
+    }
+  }%
+  \vspace{0.4cm}
+  \textbf{LU:}
+  
+  \textbf{Apellidos:}
+  
+  \textbf{Nombres:}
+  \vspace{0.5cm}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARCIAL %%%%%%%%%%%%%%%%%%%%%%%%
+
+% Esta parte arma cosas que dependen de si estamos usando beamer o no
+% tocarEspacios ajusta leftskip y parindent para poder usarlas 
+\@ifclassloaded{beamer}{%
+  \newcommand{\tocarEspacios}{%
+    \addtolength{\leftskip}{4em}%
+    \addtolength{\parindent}{-3em}%
+  }%
+}
+{%
+  \usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}%
+  \usepackage{color}%
+  \newcommand{\tocarEspacios}{%
+    \addtolength{\leftskip}{2.5em}%
+    \addtolength{\parindent}{-3em}%
+  }%
+}
+
+\@ifundefined{mod}{%
+  \newcommand{\mod}{\ \nom{mod}\ }%
+}{%
+  \renewcommand{\mod}{\ \nom{mod}\ }%
+}
+% Simbolos varios
+
+% La Z de los numeros enteros
+\newcommand{\ent}{\ensuremath{\mathbb{Z}}}
+% La R de float
+\newcommand{\float}{\ensuremath{\mathbb{R}}}
+% El tipo Bool
+\newcommand{\bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\True}{\ensuremath{\mathrm{True}}}
+\newcommand{\False}{\ensuremath{\mathrm{False}}}
+\newcommand{\Then}{\ensuremath{\rightarrow}}
+\newcommand{\Iff}{\ensuremath{\leftrightarrow}}
+\newcommand{\implica}{\ensuremath{\longrightarrow}}
+\newcommand{\IfThenElse}[3]{\ensuremath{\mathsf{if}\ #1\ \mathsf{then}\ #2\ \mathsf{else}\ #3}}
+
+% Comandos de formato
+\newcommand{\nom}[1]{\ensuremath{\mathsf{#1}}}
+% Comando para un comentario entre /* */. Font normal
+\newcommand{\comentario}[1]{{/*\ #1\ */}}
+
+\newcommand{\ya}{ya especificado en el trabajo anterior}
+
+% Comandos del lenguaje de especificacion
+% Selector para sacar elementos de una lista
+\newcommand{\selec}{\ensuremath{\leftarrow}}
+% La lista vacia
+\newcommand{\lv}{[\,]}
+% El ++ "bonito"
+\newcommand{\masmas}{\ensuremath{+\!\!\!+}}
+
+% Las barritas
+\newcommand{\longitud}[1]{\ensuremath{\left|#1\right|}}
+\newcommand{\cons}{\nom{cons}}
+\newcommand{\indice}{\nom{indice}}
+\newcommand{\conc}{\nom{conc}}
+\newcommand{\concat}{\nom{concat}}
+\newcommand{\cab}{\nom{cab}}
+\newcommand{\cola}{\nom{cola}}
+\newcommand{\sub}{\nom{sub}}
+\newcommand{\en}{\nom{en}}
+\newcommand{\cuenta}[2]{\nom{cuenta}\ensuremath{(#1, #2)}}
+\newcommand{\suma}{\nom{suma}}
+\newcommand{\twodots}{\nom{..}}
+\newcommand{\rango}[2]{[#1\twodots#2]}
+\newcommand{\rangoac}[2]{(#1\twodots#2]}
+\newcommand{\rangoca}[2]{[#1\twodots#2)}
+\newcommand{\rangoaa}[2]{(#1\twodots#2)}
+
+
+% Listas por comprension. El primer parametro es la expresion y el
+% segundo tiene los selectores y las condiciones.
+\newcommand{\comp}[2]{[\,#1\,|\,#2\,]}
+% Listas por extensión
+\newcommand{\ext}[1]{[\,#1\,]}
+
+% acum: el primer parametro es la expresion, el segundo la definicion
+% de la variable de acumulacion, y el tercero los selectores y condiciones.
+\newcommand{\acum}[3]{\mathrm{acum}(#1\; | \; #2, #3)}
+
+\newcommand{\sinonimo}[2]{%
+  \noindent%
+  {\normalfont\bfseries\ttfamily tipo\ }%
+  #1\ =\ #2%
+  {\normalfont\bfseries\,;\par}
+}
+
+\newcommand{\tupla}[2]{\ensuremath{\langle}#1, #2\ensuremath{\rangle}}
+
+% El primer parámetro es el nombre del tipo
+% El segundo parámetro es la lista de elementos
+\newcommand{\enumerado}[2]{%
+  \noindent%
+  {\normalfont\bfseries\ttfamily tipo\ }%
+  #1\ =\ #2%
+  {\normalfont\bfseries\,;\par}
+}
+
+\newcommand{\aux}[4]{%
+  {
+    \addtolength{\leftskip}{1em}
+    \addtolength{\parindent}{-2.5em}
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily #1}%
+    \ifthenelse{\equal{#2}{}}{}{\ (#2)}\ : #3\, = \ensuremath{#4}%
+    {\normalfont\bfseries\,;\par}
+  }
+}
+
+\newcommand{\encabezadoDeProblema}[4]{%
+  % Ponemos la palabrita problema en tt
+%  \noindent%
+  {\normalfont\bfseries\ttfamily problema}%
+  % Ponemos el nombre del problema
+  \ %
+  {\normalfont\ttfamily #2}%
+  \ 
+  % Ponemos los parametros
+  (#3)%
+  \ifthenelse{\equal{#4}{}}{}{%
+  \ =\ %
+  % Ponemos el nombre del resultado
+  {\normalfont\ttfamily #1}%
+  % Por ultimo, va el tipo del resultado
+  \ : #4}
+}
+
+\newcommand{\encabezadoDeTipo}[2]{%
+  % Ponemos la palabrita tipo en tt
+  {\normalfont\bfseries\ttfamily tipo}%
+  % Ponemos el nombre del tipo
+  \ %
+  {\normalfont\ttfamily #2}%
+  \ifthenelse{\equal{#1}{}}{}{$\langle$#1$\rangle$}
+}
+
+\newenvironment{problema}[4][result]{%
+  % El parametro 1 (opcional) es el nombre del resultado
+  % El parametro 2 es el nombre del problema
+  % El parametro 3 son los parametros
+  % El parametro 4 es el tipo del resultado
+  % Preambulo del ambiente problema
+  % Tenemos que definir los comandos requiere, asegura, modifica y aux
+  \newcommand{\requiere}[2][]{%
+    {\normalfont\bfseries\ttfamily requiere}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ %
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\asegura}[2][]{%
+    {\normalfont\bfseries\ttfamily asegura}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\modifica}[1]{%
+    {\normalfont\bfseries\ttfamily modifica\ }%
+    \ensuremath{##1}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \renewcommand{\aux}[4]{%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3\, = \ensuremath{##4}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\res}{#1}
+  \vspace{1ex}
+  \noindent
+  \encabezadoDeProblema{#1}{#2}{#3}{#4}
+  % Abrimos la llave
+  \{\par%
+  \tocarEspacios
+}
+% Ahora viene el cierre del ambiente problema
+{
+  % Cerramos la llave
+  \noindent\}
+  \vspace{1ex}
+}
+
+\newenvironment{tipo}[2][]{%
+  % Preambulo del ambiente tipo
+  % Tenemos que definir los comandos observador (con requiere) y aux
+  \newcommand{\observador}[3]{%
+    {\normalfont\bfseries\ttfamily observador\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\requiere}[2][]{{%
+    \addtolength{\leftskip}{3em}%
+    \setlength{\parindent}{-2em}%
+    {\normalfont\bfseries\ttfamily requiere}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ 
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}}
+  }
+  \newcommand{\explicacion}[1][]{{%
+    \addtolength{\leftskip}{3em}%
+    \setlength{\parindent}{-2em}%
+    \par \hspace{2.3em} ##1%
+    }
+  }
+  \newcommand{\invariante}[2][]{%
+    {\normalfont\bfseries\ttfamily invariante}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ 
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \renewcommand{\aux}[4]{%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3\, = \ensuremath{##4}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \vspace{1ex}
+  \noindent
+  \encabezadoDeTipo{#1}{#2}
+  % Abrimos la llave
+  \{\par%
+  \tocarEspacios
+}
+% Ahora viene el cierre del ambiente tipo
+{
+  % Cerramos la llave
+  \noindent\}
+  \vspace{1ex}
+}
+
+% Cuestiones de enunciados
+
+% Primero definiciones de cosas al estilo title, author, date
+\def\materia#1{\gdef\@materia{#1}}
+\def\@materia{Algoritmos y Estructuras de Datos I}
+\def\lamateria{\@materia}
+
+\def\cuatrimestre#1{\gdef\@cuatrimestre{#1}}
+\def\@cuatrimestre{No especifi\'o el cuatrimestre}
+\def\elcuatrimestre{\@cuatrimestre}
+
+\def\anio#1{\gdef\@anio{#1}}
+\def\@anio{No especifi\'o el anio}
+\def\elanio{\@anio}
+
+\def\fecha#1{\gdef\@fecha{#1}}
+\def\@fecha{\today}
+\def\lafecha{\@fecha}
+
+\def\nombre#1{\gdef\@nombre{#1}}
+\def\@nombre{No especific'o el nombre}
+\def\elnombre{\@nombre}
+
+\def\practica#1{\gdef\@practica{#1}}
+\def\@practica{No especifi\'o el n\'umero de pr\'actica}
+\def\lapractica{\@practica}
+
+% Esta macro convierte el numero de cuatrimestre a palabras
+\newcommand{\cuatrimestreLindo}{
+  \ifthenelse{\equal{\elcuatrimestre}{1}}
+  {Primer cuatrimestre}
+  {\ifthenelse{\equal{\elcuatrimestre}{2}}
+  {Segundo cuatrimestre}
+  {Verano}}
+}
+
+\newcommand{\depto}{{UBA -- Facultad de Ciencias Exactas y Naturales --
+      Departamento de Computaci\'on}}
+
+\newcommand{\titulopractica}{
+  \centerline{\depto}
+  \vspace{1ex}
+  \centerline{{\Large\lamateria}}
+  \vspace{0.5ex}
+  \centerline{\cuatrimestreLindo de \elanio}
+  \vspace{2ex}
+  \centerline{{\huge Pr\'actica \lapractica -- \elnombre}}
+  \vspace{5ex}
+  \arreglarincisos
+  \newcounter{ejercicio}
+  \newenvironment{ejercicio}{\stepcounter{ejercicio}\textbf{Ejercicio
+      \theejercicio}%
+    \renewcommand\@currentlabel{\theejercicio}%
+  }{\vspace{0.2cm}}
+}  
+
+\newcommand{\titulotp}{
+  \centerline{\depto}
+  \vspace{1ex}
+  \centerline{{\Large\lamateria}}
+  \vspace{0.5ex}
+  \centerline{\cuatrimestreLindo de \elanio}
+  \vspace{0.5ex}
+  \centerline{\lafecha}
+  \vspace{2ex}
+  \centerline{{\huge\elnombre}}
+  \vspace{5ex}
+}
+
+% AMBIENTE CONSIGNAS
+% Se usa en el TP para ir agregando las cosas que tienen que resolver
+% los alumnos.
+% Dentro del ambiente hay que usar \item para cada consigna
+
+\newcounter{consigna}
+\setcounter{consigna}{0}
+
+\newenvironment{consignas}{%
+  \newcommand{\consigna}{\stepcounter{consigna}\textbf{\theconsigna.}}%
+  \newcommand{\ejercicio}[1]{\item ##1 }
+  \renewcommand{\problema}[5][result]{\item
+    \encabezadoDeProblema{##1}{##2}{##3}{##4}\hspace{1em}##5}%
+  \newcommand{\invariante}[2]{\item%
+    {\normalfont\bfseries\ttfamily invariante}%
+    \ ##1\hspace{1em}##2%
+  }
+  \renewcommand{\aux}[4]{\item%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3 \hspace{1em}##4%
+  }
+  % Comienza la lista de consignas
+  \begin{list}{\consigna}{%
+      \setlength{\itemsep}{0.5em}%
+      \setlength{\parsep}{0cm}%
+    }
+}%
+{\end{list}}
+
+
+% MACROS ESPECIFICAS DE IMPERATIVO
+
+% El primer parametro es el nombre del segundo parametro del ==
+% El segundo parametro es el nombre del tipo
+\newcommand{\eligualigual}[2]%
+{%
+\begin{problema}{operator==}{this,#1 : #2}{Bool}
+  \asegura{result == (this == #1)}
+\end{problema}
+}
+
+% Manejo de listas
+% LaTeX deja demasiado espacio entre los items para nuestros propósitos.
+\renewcommand{\enumhook}{\setlength{\itemsep}{-4pt}}
+
+% Esto ajusta el espacio que se deja antes y después de los
+% environments multicol
+\setlength{\multicolsep}{5pt}
+
+\makeatother
+
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+%\usepackage{bbm}
+\usepackage{framed}
+\usepackage{a4wide} % márgenes un poco más anchos que lo usual
+
+
+\newcommand{\comen}[2]{%
+\begin{framed}
+\noindent \textsf{#1:} #2
+\end{framed}
+}
+
+% **************************************************************************
+%
+%  Package 'caratula', version 0.5 (para componer caratulas de TPs del DC).
+%
+%  En caso de dudas, problemas o sugerencias sobre este package escribir a
+%  Brian J. Cardiff (bcardif arroba gmail.com).
+%  Nico Rosner (nrosner arroba dc.uba.ar).
+%
+% **************************************************************************
+
+% ----- Informacion sobre el package para el sistema -----------------------
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{caratula}[2013/08/04 v0.5 Para componer caratulas de TPs del DC]
+\RequirePackage{ifthen}
+\usepackage[pdftex]{graphicx}
+
+% ----- Imprimir un mensajito al procesar un .tex que use este package -----
+
+\typeout{Cargando package 'caratula' v0.5 (2013/08/04)}
+
+% ----- Algunas variables --------------------------------------------------
+
+\let\Materia\relax
+\let\Submateria\relax
+\let\Titulo\relax
+\let\Subtitulo\relax
+\let\Grupo\relax
+\let\Fecha\relax
+\let\Logoimagefile\relax
+\newcommand{\LabelIntegrantes}{}
+\newboolean{showLU}
+\newboolean{showEntregas}
+\newboolean{showDirectores}
+
+% ----- Comandos para que el usuario defina las variables ------------------
+
+\def\materia#1{\def\Materia{#1}}
+\def\submateria#1{\def\Submateria{#1}}
+\def\titulo#1{\def\Titulo{#1}}
+\def\subtitulo#1{\def\Subtitulo{#1}}
+\def\grupo#1{\def\Grupo{#1}}
+\def\fecha#1{\def\Fecha{#1}}
+\def\logoimagefile#1{\def\Logoimagefile{#1}}
+
+% ----- Token list para los integrantes ------------------------------------
+
+\newtoks\intlist\intlist={}
+
+\newtoks\intlistSinLU\intlistSinLU={}
+
+\newcounter{integrantesCount}
+\setcounter{integrantesCount}{0}
+\newtoks\intTabNombre\intTabNombre={}
+\newtoks\intTabLU\intTabLU={}
+\newtoks\intTabEmail\intTabEmail={}
+
+\newcounter{directoresCount}
+\setcounter{directoresCount}{0}
+\newtoks\direcTabNombre\direcTabNombre={}
+\newtoks\direcTabEmail\direcTabEmail={}
+
+% ----- Comando para que el usuario agregue integrantes --------------------
+
+\def\integrante#1#2#3{%
+    \intlist=\expandafter{\the\intlist\rule{0pt}{1.2em}#1&#2&\tt #3\\[0.2em]}%
+    \intlistSinLU=\expandafter{\the\intlistSinLU\rule{0pt}{1.2em}#1 & \tt #3\\[0.2em]}%
+    %
+    \ifthenelse{\value{integrantesCount} > 0}{%
+        \intTabNombre=\expandafter{\the\intTabNombre & #1}%
+        \intTabLU=\expandafter{\the\intTabLU & #2}%
+        \intTabEmail=\expandafter{\the\intTabEmail & \tt #3}%
+    }{
+        \intTabNombre=\expandafter{\the\intTabNombre #1}%
+        \intTabLU=\expandafter{\the\intTabLU #2}%
+        \intTabEmail=\expandafter{\the\intTabEmail \tt #3}%
+    }%
+    \addtocounter{integrantesCount}{1}%
+}
+
+\def\director#1#2{%
+    \ifthenelse{\value{directoresCount} > 0}{%
+        \direcTabNombre=\expandafter{\the\direcTabNombre & #1}%
+        \direcTabEmail=\expandafter{\the\direcTabEmail & \tt #2}%
+    }{
+        \direcTabNombre=\expandafter{\the\direcTabNombre #1}%
+        \direcTabEmail=\expandafter{\the\direcTabEmail \tt #2}%
+    }%
+    \addtocounter{directoresCount}{1}%
+}
+
+% ----- Macro para generar la tabla de integrantes -------------------------
+
+\newcommand{\tablaIntegrantes}{\ }
+
+\newcommand{\tablaIntegrantesVertical}{%
+\ifthenelse{\boolean{showLU}}{%
+    \begin{tabular}[t]{| l @{\hspace{4ex}} c @{\hspace{4ex}} l|}
+        \hline
+        \multicolumn{1}{|c}{\rule{0pt}{1.2em} \LabelIntegrantes} & LU &  \multicolumn{1}{c|}{Correo electr\'onico} \\[0.2em]
+        \hline \hline
+        \the\intlist
+        \hline
+    \end{tabular}
+}{
+    \begin{tabular}[t]{| l @{\hspace{4ex}} @{\hspace{4ex}} l|}
+        \hline
+        \multicolumn{1}{|c}{\rule{0pt}{1.2em} \LabelIntegrantes} &  \multicolumn{1}{c|}{Correo electr\'onico} \\[0.2em]
+        \hline \hline
+        \the\intlistSinLU
+        \hline
+    \end{tabular}
+    }%
+}
+
+\newcommand{\tablaIntegrantesHorizontal}{%
+    \begin{tabular}[t]{ *{\value{integrantesCount}}{c} }
+    \the\intTabNombre \\%
+\ifthenelse{\boolean{showLU}}{
+    \the\intTabLU \\%
+}{}
+    \the\intTabEmail %
+    \end{tabular}%
+}
+
+\newcommand{\tablaDirectores}{%
+\ifthenelse{\boolean{showDirectores}}{%
+    \bigskip
+    Directores
+
+    \smallskip
+    \begin{tabular}[t]{ *{\value{directoresCount}}{c} }
+    \the\direcTabNombre \\%
+    \the\direcTabEmail %
+    \end{tabular}%
+}{}%
+}
+
+\newcommand{\tablaEntregas}{%
+\ifthenelse{\boolean{showEntregas}}{%
+  \bigskip%
+  \begin{tabular}[t]{|l p{3.5cm} p{1.5cm}|}%
+  \hline%
+  \rule{0pt}{1.2em} Instancia & Docente & Nota \\[0.2em] %
+  \hline%
+  \hline%
+  \rule{0pt}{1.2em} Primera entrega & & \\[0.2em] %
+  \hline%
+  \rule{0pt}{1.2em} Segunda entrega & & \\[0.2em] %
+  \hline%
+  \end{tabular}%
+}{}%
+}
+
+% ----- Codigo para manejo de errores --------------------------------------
+
+\def\se{\let\ifsetuperror\iftrue}
+\def\ifsetuperror{%
+    \let\ifsetuperror\iffalse
+    \ifx\Materia\relax\se\errhelp={Te olvidaste de proveer una \materia{}.}\fi
+    \ifx\Titulo\relax\se\errhelp={Te olvidaste de proveer un \titulo{}.}\fi
+    \edef\mlist{\the\intlist}\ifx\mlist\empty\se%
+    \errhelp={Tenes que proveer al menos un \integrante{nombre}{lu}{email}.}\fi
+    \expandafter\ifsetuperror}
+
+\def\aftermaketitle{%
+  \setcounter{page}{1}
+}
+
+% ----- \maketitletxt correspondiente a la versi�n v0.2.1 (texto v0.2 + fecha ) ---------
+
+\def\maketitletxt{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+    \thispagestyle{empty}
+    \begin{center}
+    \vspace*{\stretch{2}}
+    {\LARGE\textbf{\Materia}}\\[1em]
+    \ifx\Submateria\relax\else{\Large \Submateria}\\[0.5em]\fi
+    \ifx\Fecha\relax\else{\Large \Fecha}\\[0.5em]\fi
+    \par\vspace{\stretch{1}}
+    {\large Departamento de Computaci\'on}\\[0.5em]
+    {\large Facultad de Ciencias Exactas y Naturales}\\[0.5em]
+    {\large Universidad de Buenos Aires}
+    \par\vspace{\stretch{3}}
+    {\Large \textbf{\Titulo}}\\[0.8em]
+    {\Large \Subtitulo}
+    \par\vspace{\stretch{3}}
+    \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+    \tablaIntegrantes
+    \end{center}
+    \vspace*{\stretch{3}}
+    \newpage\aftermaketitle}
+
+% ----- \maketitletxtlogo correspondiente v0.2.1 (texto con fecha y logo) ---------
+
+\def\maketitletxtlogo{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+    \thispagestyle{empty}
+    \begin{center}
+    \ifx\Logoimagefile\relax\else\includegraphics{\Logoimagefile}\fi \hfill \includegraphics{logo_dc.jpg}\\[1em]
+    \vspace*{\stretch{2}}
+    {\LARGE\textbf{\Materia}}\\[1em]
+    \ifx\Submateria\relax\else{\Large \Submateria}\\[0.5em]\fi
+    \ifx\Fecha\relax\else{\large \Fecha}\\[0.5em]\fi
+    \par\vspace{\stretch{1}}
+    {\large Departamento de Computaci\'on}\\[0.5em]
+    {\large Facultad de Ciencias Exactas y Naturales}\\[0.5em]
+    {\large Universidad de Buenos Aires}
+    \par\vspace{\stretch{3}}
+    {\Large \textbf{\Titulo}}\\[0.8em]
+    {\Large \Subtitulo}
+    \par\vspace{\stretch{3}}
+    \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+    \tablaIntegrantes
+    \end{center}
+    \vspace*{\stretch{4}}
+    \newpage\aftermaketitle}
+
+% ----- \maketitlegraf correspondiente a la versi�n v0.3 (gr�fica) -------------
+
+\def\maketitlegraf{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+%
+    \thispagestyle{empty}
+
+    \ifx\Logoimagefile\relax\else\includegraphics{\Logoimagefile}\fi \hfill \includegraphics{logo_dc.jpg}
+
+    \vspace*{.06 \textheight}
+
+    \noindent \textbf{\huge \Titulo}  \medskip \\
+    \ifx\Subtitulo\relax\else\noindent\textbf{\large \Subtitulo} \\ \fi%
+    \noindent \rule{\textwidth}{1 pt}
+
+    {\noindent\large\Fecha \hspace*\fill \Materia} \\
+    \ifx\Submateria\relax\else{\noindent \hspace*\fill \Submateria}\fi%
+
+    \medskip%
+    \begin{center}
+        \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+        \tablaIntegrantes
+
+        \tablaDirectores
+
+        \tablaEntregas
+    \end{center}%
+    \vfill%
+%
+    \begin{minipage}[t]{\textwidth}
+        \begin{minipage}[t]{.55 \textwidth}
+            \includegraphics{logo_uba.jpg}
+        \end{minipage}%%
+        \begin{minipage}[b]{.45 \textwidth}
+            \textbf{\textsf{Facultad de Ciencias Exactas y Naturales}} \\
+            \textsf{Universidad de Buenos Aires} \\
+            {\scriptsize %
+            Ciudad Universitaria - (Pabell\'on I/Planta Baja) \\
+                Intendente G\"uiraldes 2160 - C1428EGA \\
+            Ciudad Aut\'onoma de Buenos Aires - Rep. Argentina \\
+                Tel/Fax: (54 11) 4576-3359 \\
+            http://www.fcen.uba.ar \\
+            }
+        \end{minipage}
+    \end{minipage}%
+%
+    \newpage\aftermaketitle}
+
+% ----- Reemplazamos el comando \maketitle de LaTeX con el nuestro ---------
+\renewcommand{\maketitle}{\maketitlegraf}
+
+% ----- Dependiendo de las opciones ---------
+%
+% opciones:
+%   txt     : caratula solo texto.
+%   txtlogo : caratula txt con logo del DC y del grupo (opcional).
+%   graf    : (default) caratula grafica con logo del DC, UBA y del grupo (opcional).
+%
+%\@makeother\*% some package redefined it as a letter (as color.sty)
+%
+% Layout general de la caratula
+%
+\DeclareOption{txt}{\renewcommand{\maketitle}{\maketitletxt}}
+\DeclareOption{txtlogo}{\renewcommand{\maketitle}{\maketitletxtlogo}}
+\DeclareOption{graf}{\renewcommand{\maketitle}{\maketitlegraf}}
+%
+% Etiqueta Autores o Integrantes
+%
+\DeclareOption{integrante}{\renewcommand{\LabelIntegrantes}{Integrante}}
+\DeclareOption{autor}{\renewcommand{\LabelIntegrantes}{Autor}}
+%
+% Formato tabla de integrantes
+%
+\DeclareOption{intVert}{\renewcommand{\tablaIntegrantes}{\tablaIntegrantesVertical}}
+\DeclareOption{intHoriz}{\renewcommand{\tablaIntegrantes}{\tablaIntegrantesHorizontal}}
+\DeclareOption{conLU}{\setboolean{showLU}{true}}
+\DeclareOption{sinLU}{\setboolean{showLU}{false}}
+\DeclareOption{conEntregas}{\setboolean{showEntregas}{true}}
+\DeclareOption{sinEntregas}{\setboolean{showEntregas}{false}}
+\DeclareOption{showDirectores}{\setboolean{showDirectores}{true}}
+\DeclareOption{hideDirectores}{\setboolean{showDirectores}{false}}
+%
+% Opciones predeterminadas
+%
+\ExecuteOptions{intVert}%
+\ExecuteOptions{graf}%
+\ExecuteOptions{integrante}%
+\ExecuteOptions{conLU}%
+\ExecuteOptions{hideDirectores}%
+\ExecuteOptions{sinEntregas}%
+%
+\ProcessOptions\relax
+
+\begin{document}
+
+\titulo{Recuperatorio Trabajo Práctico Especificación}
+\subtitulo{Cine}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructura de Datos I}
+\grupo{Grupo 8}
+
+\integrante{Fosco, Martin Esteban}{449/13}{mfosco2005@yahoo.com.ar}
+\integrante{Murga, Christian Mariano}{982/12}{christian.murga@underverse.com.ar}
+\integrante{Minces Müller, Javier Nicolás}{231/13}{javijavi1994@gmail.com}
+\integrante{Previgliano, Fabricio Jose}{430/13}{fjprevi@gmail.com}
+
+
+
+\maketitle
+
+\clearpage
+
+\materia{Algoritmos y Estructura de Datos I}
+\cuatrimestre{2}
+\anio{2013}
+
+\nombre{\LARGE RTPE Cine}
+
+\titulotp
+
+
+\sinonimo{Actor}{String}
+\sinonimo{Sala}{\ent}
+\enumerado{género}{Aventura, Comedia, Drama, Romántica, Terror}
+
+\vspace{0.5cm}
+
+\begin{tipo}{Pelicula}
+    \observador{nombre}{p: Pelicula}{String}
+    \observador{géneros}{p: Pelicula}{[Género]}
+    \observador{actores}{p: Pelicula}{[Actor]}
+	\observador{es3D}{p: Pelicula}{Bool}
+	\invariante[sinActoresRepetidos]{sinRepetidos(actores(p))}
+	\invariante[sinGénerosRepetidos]{sinRepetidos(generos(p))}
+	\invariante[génerosOrdenados]{Ordenados(generos(p))}
+	\invariante[actoresOrdenados]{PalabrasOrdenadas(actores(p))}
+\end{tipo}
+
+%....................................................................3...........................................
+\begin{problema}{agruparPelisPorGenero}{ps:[Pelicula]}{[(Genero, [Pelicula])]}
+
+\requiere {SinRepetidos(ps)}
+
+\asegura [mismosGeneros] {mismos(primeros(result)),sinRepetidos(listaGeneros(ps))}
+\asegura [mismasPeliculas] {(\forall x \leftarrow result)mismos (sgd(x),peliculasConGenero(prm(x)),ps))}
+
+
+\aux {peliculasConGenero}{a : G\'enero, ps : [Pelicula]}{[Pelicula]}{[px \mid px \leftarrow ps, a \in g\acute{e}neros(px)]}
+\aux {primeros} {gps:[(Genero,[Pelicula])]} {[Genero]} {[prm(i)|i\leftarrow gps]}
+%\aux {listaGeneros}{ }{[Genero]}{[Aventura, Comedia, Drama, Rom\acute{a}ntica, Terror]}
+\aux {listaGeneros}{ps: [Pelicula]}{[Genero]}{[genero(p)|p\leftarrow ps]}
+
+\end{problema}
+
+%....................................................................4...........................................
+\begin{problema}{generarSagaDePeliculas}{as:[Actor], gs:[Genero], nombres:[String]}{[Pelicula]}
+
+\requiere {sinRepetidos(nombres)}
+\requiere {sinRepetidos(as)}
+\requiere {sinRepetidos(gs)}
+\asegura {|result| == |nombres|}
+\asegura [mismosActores]{(\forall p \leftarrow result) mismos(as, actores(p))}
+\asegura [mismosGeneros]{(\forall p \leftarrow result) mismos(gs, generos(p))}
+\asegura [mismosNombres]{mismos(listaDeNombres(result), nombres)}
+\aux {listaDeNombres}{x:[Pelicula]}{[String]}{ [nombres(y)| y \leftarrow x ]}
+\end{problema}
+
+\begin{tipo}{Ticket}
+	\observador{película}{t: Ticket}{Pelicula}
+	\observador{sala}{t: Ticket}{Sala}
+	\observador{usado}{t: Ticket}{Bool}
+\end{tipo}
+
+%....................................................................5...........................................
+\begin{problema}{películaMenosVista}{ts : [Ticket]}{pelicula}{}
+
+
+\asegura [esLaMenosVista] {(\forall t \leftarrow ts)vecesVistaLaPeli(pelicula(t),ts)\\ \geq vecesVistaLaPeli(result,ts)}
+\aux{vecesVistaPeli}{P:Pelicula,ts:[Ticket]}{\ent}{|[x| x \leftarrow ts, usado(x), pelicula(x) == P]|}
+
+\end{problema}
+
+%....................................................................6...........................................
+\begin{problema}{todosLosTicketsParaLaMismaSala}{ts:[Ticket]}{\bool}
+
+\asegura [sonDeLaMismaSala]{todos([sala(ts[i]) == sala(ts[j])|j \leftarrow [0..|ts|]), i \leftarrow [0...|ts|)]) == result}
+\end{problema}
+
+%....................................................................7...........................................
+\begin{problema}{cambiarSala}{ts:[Ticket], vieja: Sala, nueva: Sala}{}{}
+\modifica {ts} 
+
+\asegura [igualCantidadTickets]{\left |ts\right |==\left |pre(ts)\right | }
+\asegura [mismaPeliculaTicket]{(\forall i\leftarrow [0..|pre(ts)|))pelicula(pre(ts)[i])==pelicula(ts[i]) }
+\asegura [mismoEstadoTicket]{(\forall i\leftarrow [0..|pre(ts)|))usado(pre(ts)[i])==usado(ts[i])}
+\asegura [mismaSalaTicket]{(\forall i\leftarrow [0..|pre(ts)|),sala(pre(ts)[i])==vieja)\\sala(ts[i])==nueva}
+\asegura [cambiaSala]{(\forall i\leftarrow [0..|pre(ts)|),sala(pre(ts)[i])\neq vieja)\\sala(ts[i])==sala(pre(ts)[i])}
+
+\end{problema}
+
+
+
+
+\begin{tipo}{Cine}
+	\observador{nombre}{c: Cine}{String}
+	\observador{películas}{c: Cine}{[Peliculas]}
+	\observador{salas}{c: Cine}{[Sala]}
+	\observador{sala}{c: Cine, p: Pelicula}{Sala}
+		\requiere{p \in peliculas(c)}
+	\observador{espectadores}{c: Cine, s: Sala}{\ent}
+		\requiere{s \in salas(c)}
+	\observador{ticketsVendidosSinUsar}{c: Cine}{[Ticket]}
+	\invariante[sinPeliculasRepetidas]{sinRepetidos(nombresDePeliculas(c))}
+	\invariante[sinSalasRepetidas]{sinRepetidos(salas(c))}
+	\invariante[salasDeCineSonSalas]{(\forall p \leftarrow peliculas(c)) sala(c,p) \in salas(c) }
+    \invariante[salasSinPelisSinEspectadores]{\forall s \leftarrow salas(c))\neg tienePeli(c,s) \Rightarrow \\ espectadores (c,s) = 0}
+	\invariante[espectadoresNoNegativos]{(\forall s \leftarrow salas(c)) espectadores(c,s) \geq 0 }
+	\invariante[losTicketsVendidosEstanSinUsar]{(\forall t \selec ticketsVendidosSinUsar(c))\\ \lnot usado(t) }
+	\invariante[salasConsistentes]{(\forall p,q \leftarrow peliculas(c),p\neq q)sala(c; p) \neq sala(c; q) }
+	\invariante[losTicketsVendidosSonParaPeliculasDelCine]{ (\forall t\leftarrow ticketsVendidosSinUsar (c))\\ (pelicula(t)\in peliculas(c)\wedge sala(t)==sala(c,pelicula (t)))  
+}
+\end{tipo}
+
+%....................................................................10...........................................
+\begin{problema}{cineVacio}{n: String}{Cine}{}{}
+
+\asegura [nombreCine]{nombre(result) == n}
+\asegura [estaVacio]{Salas(n) == []}
+
+\end{problema}
+
+%....................................................................11...........................................
+
+\aux{peliSalas}{c: Cine,sl: [Sala]}{[Pelicula]}{[p|s\leftarrow sl,p\leftarrow peliculas(c), sala(c,p)==s]} 
+
+\begin{problema}{agregarPelicula}{c: Cine, p: Pelicula, s: Sala}{}{}
+
+\requiere {p \notin peliculas(c)}
+\requiere {s \in salas(c) }
+\requiere {tienePeli (c,s) == false}
+\modifica {c}
+\asegura [salaDePeli]{sala(c,p) == s}
+\asegura [salasDePelisQueNoCambian]{(\forall p\leftarrow peliculas(pre(c)))sala(c,p)==sala(pre(c),p)} %Lo agregué acá
+\asegura [mismoNombreC]{nombre(c) == nombre(pre(c))}
+\asegura [mismosTicketsC]{mismos(ticketsVendidosSinUsar(c),\\ ticketsVendidosSinUsar(pre(c)))}
+\asegura [MismosEspectadores]{(\forall s\leftarrow Salas(c)) Espectadores(pre(c),s) \\== Espectadores(c,s)}
+\asegura [PelisDeCine]{mismos(peliculas(c),peliculas(pre(c))++p)}
+\asegura [mismasSalas]{mismos(salas(c),salas(pre(c))}
+\end{problema}
+ 
+%....................................................................12...........................................
+\begin{problema}{cerrarSala}{c: Cine, s: Sala}{}
+\requiere {s \in salas(c)}
+\modifica {c}
+\asegura [cantidadSalasMenosUna]{mismos(salas (pre(c)), salas(c)++[s])} 
+\asegura [mantieneNombre]{nombre(c) == nombre(pre(c))}
+\asegura [sacaPeliSiTeniaPeli]{(tienePeli(pre(c),s) == false \wedge mismos(peliculas(c),peliculas(pre(c)) \vee  tienepeli(pre(c),s) \wedge mismos((peliculas(pre(c)),peliculas(c)++pelisalas(pre(c),[s])))}
+\asegura [mismoEstadoTicketsVendidosSinUsar]{mismos(ticketsVendidosSinUsar(pre(c)),ticketsVendidos\-SinUsar(c)++ticketSala(pre(c),s))}
+\asegura [mismaCantEspectadores]{(\forall j\leftarrow salas(c)) espectadores(pre(c),j) == espectadores(c,j)}
+\asegura [mantienenSalas]{(\forall p\leftarrow peliculas(c))sala(c,p)==sala(pre(c),p)}
+
+\aux{ticketSala}{c:cine,s:sala}{[Ticket]}{[t|t \leftarrow ticketsVendidosSinUsar(c), sala(t)==s]}
+\end{problema} 
+
+
+\aux {salasConMenosDe}{e:Int,c:Cine}{[Int]}{[s\mid s\leftarrow salas(c),espectadores(c,s) < e]}
+\aux {PeliDeSala}{c:Cine,s:Sala}{Pelicula}{cab([x\mid x\leftarrow pel\acute{i}culas(c),sala(c,p) == s])}
+\aux {TicketsDeSalas}{c:Cine,ss:[Sala]}{[Ticket]}{[t\mid t\leftarrow ticketsVendidosSinUsar(c),sala(t)\in ss]}
+
+%....................................................................13...........................................
+\begin{problema}{cerrarSalas}{c: Cine, e: \ent}{}{}
+\requiere {e > 0}
+\modifica {c}
+\asegura [mismoNombreC]{nombre(c) == nombre(pre(c))}
+\asegura [salasCambiadas]{mismos(salas(c) ++ salasConMenosDe(e, pre(c)),salas(pre(c)))}
+\asegura [cantidadCorrectaPeliculas]{long(pel\acute{i}culas(c)) == long(pel\acute{i}culas(pre(c)) - long([x\mid x\leftarrow salas\-ConMenosDe(e,pre(c)),Tiene\-Peli(pre(c),x)])}
+\asegura []{(\forall  pn\leftarrow pel\acute{i}culas(c))(\exists  pv\leftarrow pel\acute{i}culas(pre(c)))(pn == pv)\\ \wedge (sala(c, pn) == sala(pre(c), pv))\\ \wedge (espectadores(c, sala(c, pn)) == espectadores(pre(c), sala(pre(c), pv)))}
+\asegura []{(\forall  pv\leftarrow pel\acute{i}culas(pre(c)), pv \in salasConMenosDe(e, pre(c))) \neg((\exists  pn\leftarrow pel\acute{i}culas(c))pn == pv)}
+\asegura [mismosTicketsVendidosSinUsar]{mismos(ticketsVendidosSinUsar(c) ++ TicketsDeSalas(pre(c),salasConMenosDe(e, pre(c))),\\ticketsVendidosSinUsar(pre(c)))}
+
+\end{problema}
+\documentclass[spanish,a4paper]{article}
+
+% Paquetes generales
+\usepackage{ifthen}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage[absolute]{textpos}
+
+%%%%%%%%%%%%%%%%%%%%%%%% TWEAKLIST.STY %%%%%%%%%%%%%%%%%%%%%%%%
+%% Esto esta copiado de tweaklist.sty, un paquete que encontré en la
+%% web. Define hooks que se ejecutan cada vez que se invoca
+%% determinado environment (itemhook, enumhook y descripthook
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\def\enumhook{}
+% \def\enumhooki{}\def\enumhookii{}\def\enumhookiii{}
+% \def\enumhookiv{}\def\itemhook{}\def\itemhooki{}\def\itemhookii{}
+% \def\itemhookiii{}\def\itemhookiv{}\def\descripthook{}
+\def\enumerate{%
+  \ifnum \@enumdepth >\thr@@\@toodeep\else
+    \advance\@enumdepth\@ne
+    \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+      \expandafter
+      \list
+        \csname label\@enumctr\endcsname
+        {\usecounter\@enumctr\def\makelabel##1{\hss\llap{##1}}%
+          \enumhook \csname enumhook\romannumeral\the\@enumdepth\endcsname}%
+  \fi}
+% En las practicas usamos numeros arabigos para los ejercicios.
+% Aca cambiamos los enumerate comunes para que usen letras y numeros
+% romanos
+\newcommand{\arreglarincisos}{%
+  \renewcommand{\theenumi}{\alph{enumi}}
+  \renewcommand{\theenumii}{\roman{enumii}}
+  \renewcommand{\labelenumi}{\theenumi)}
+  \renewcommand{\labelenumii}{\theenumii)}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARCIAL %%%%%%%%%%%%%%%%%%%%%
+\let\@xa\expandafter
+\newcommand{\tituloparcial}{\centerline{\depto -- \lamateria}
+  \centerline{\elnombre -- \lafecha}%
+  \setlength{\TPHorizModule}{10mm} % Fija las unidades de textpos
+  \setlength{\TPVertModule}{\TPHorizModule} % Fija las unidades de
+                                % textpos
+  \arreglarincisos
+  \newcounter{total}% Este contador va a guardar cuantos incisos hay
+                    % en el parcial. Si un ejercicio no tiene incisos,
+                    % cuenta como un inciso.
+  \newcounter{contgrilla} % Para hacer ciclos
+  \newcounter{columnainicial} % Se van a usar para los cline cuando un
+  \newcounter{columnafinal}   % ejercicio tenga incisos.
+  \newcommand{\primerafila}{}
+  \newcommand{\segundafila}{}
+  \newcommand{\rayitas}{} % Esto va a guardar los \cline de los
+                          % ejercicios con incisos, asi queda mas bonito
+  \newcommand{\anchodegrilla}{20} % Es para textpos
+  \newcommand{\izquierda}{7} % Estos dos le dicen a textpos donde colocar
+  \newcommand{\abajo}{2}     % la grilla
+  \newcommand{\anchodecasilla}{0.4cm}
+  \setcounter{columnainicial}{1}
+  \setcounter{total}{0}
+  \newcounter{ejercicio}
+  \setcounter{ejercicio}{0}
+  \newenvironment{ejercicio}[1]
+  {%
+    \stepcounter{ejercicio}\textbf{Ejercicio \theejercicio. [##1
+      puntos]}% Formato
+    \renewcommand\@currentlabel{\theejercicio}% Esto es para las
+                                % referencias
+    \newcommand{\invariante}[2]{%
+      {\normalfont\bfseries\ttfamily invariante}%
+      \ ####1\hspace{1em}####2%
+    }%
+    \renewcommand{\problema}[5][result]{
+      \encabezadoDeProblema{####1}{####2}{####3}{####4}\hspace{1em}####5}%
+  }% Aca se termina el principio del ejercicio
+  {% Ahora viene el final
+    % Esto suma la cantidad de incisos o 1 si no hubo ninguno
+    \ifthenelse{\equal{\value{enumi}}{0}}
+    {\addtocounter{total}{1}}
+    {\addtocounter{total}{\value{enumi}}}
+    \ifthenelse{\equal{\value{ejercicio}}{1}}{}
+    {
+      \g@addto@macro\primerafila{&} % Si no estoy en el primer ej.
+      \g@addto@macro\segundafila{&}
+    }
+    \ifthenelse{\equal{\value{enumi}}{0}}
+    {% No tiene incisos
+      \g@addto@macro\primerafila{\multicolumn{1}{|c|}}
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\theejercicio}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      
+      \stepcounter{columnainicial}
+    }
+    {% Tiene incisos
+      % Primero ponemos el encabezado
+      \g@addto@macro\primerafila{\multicolumn}% Ahora el numero de items
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\arabic{enumi}}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      % global 
+      % Ahora el formato
+      \g@addto@macro\primerafila{{|c|}}%
+      % Ahora el numero de ejercicio
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\theejercicio}% expand as far as we can
+      \@xa\g@addto@macro\@xa\primerafila\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      % global 
+      % Ahora armamos la segunda fila
+      \g@addto@macro\segundafila{\multicolumn{1}{|c|}{a}}%
+      \setcounter{contgrilla}{1}
+      \whiledo{\value{contgrilla}<\value{enumi}}
+      {%
+        \stepcounter{contgrilla}
+        \g@addto@macro\segundafila{&\multicolumn{1}{|c|}}
+        \bgroup% avoid overwriting somebody else's value of \tmp@a
+        \protected@edef\tmp@a{\alph{contgrilla}}% expand as far as we can
+        \@xa\g@addto@macro\@xa\segundafila\@xa{\tmp@a}%
+        \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+        % global 
+      }
+      % Ahora armo las rayitas
+      \setcounter{columnafinal}{\value{columnainicial}}
+      \addtocounter{columnafinal}{-1}
+      \addtocounter{columnafinal}{\value{enumi}}
+      \bgroup% avoid overwriting somebody else's value of \tmp@a
+      \protected@edef\tmp@a{\noexpand\cline{%
+          \thecolumnainicial-\thecolumnafinal}}%
+      \@xa\g@addto@macro\@xa\rayitas\@xa{\tmp@a}%
+      \egroup% restore old value of \tmp@a, effect of \g@addto.. is
+      \setcounter{columnainicial}{\value{columnafinal}}
+      \stepcounter{columnainicial}
+    }
+    \setcounter{enumi}{0}%
+    \vspace{0.2cm}%
+  }%
+  \newcommand{\tercerafila}{}
+  \newcommand{\armartercerafila}{
+    \setcounter{contgrilla}{1}
+    \whiledo{\value{contgrilla}<\value{total}}
+    {\stepcounter{contgrilla}\g@addto@macro\tercerafila{&}}
+  }
+  \newcommand{\grilla}{%
+    \g@addto@macro\primerafila{&\textbf{TOTAL}}
+    \g@addto@macro\segundafila{&}
+    \g@addto@macro\tercerafila{&}
+    \armartercerafila
+    \ifthenelse{\equal{\value{total}}{\value{ejercicio}}}
+    {% No hubo incisos
+      \begin{textblock}{\anchodegrilla}(\izquierda,\abajo)
+        \begin{tabular}{|*{\value{total}}{p{\anchodecasilla}|}c|}
+          \hline
+          \primerafila\\
+          \hline
+          \tercerafila\\
+          \tercerafila\\
+          \hline
+        \end{tabular}
+      \end{textblock}
+    }
+    {% Hubo incisos
+      \begin{textblock}{\anchodegrilla}(\izquierda,\abajo)
+        \begin{tabular}{|*{\value{total}}{p{\anchodecasilla}|}c|}
+          \hline
+          \primerafila\\
+          \rayitas
+          \segundafila\\
+          \hline
+          \tercerafila\\
+          \tercerafila\\
+          \hline
+        \end{tabular}
+      \end{textblock}
+    }
+  }%
+  \vspace{0.4cm}
+  \textbf{LU:}
+  
+  \textbf{Apellidos:}
+  
+  \textbf{Nombres:}
+  \vspace{0.5cm}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARCIAL %%%%%%%%%%%%%%%%%%%%%%%%
+
+% Esta parte arma cosas que dependen de si estamos usando beamer o no
+% tocarEspacios ajusta leftskip y parindent para poder usarlas 
+\@ifclassloaded{beamer}{%
+  \newcommand{\tocarEspacios}{%
+    \addtolength{\leftskip}{4em}%
+    \addtolength{\parindent}{-3em}%
+  }%
+}
+{%
+  \usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}%
+  \usepackage{color}%
+  \newcommand{\tocarEspacios}{%
+    \addtolength{\leftskip}{2.5em}%
+    \addtolength{\parindent}{-3em}%
+  }%
+}
+
+\@ifundefined{mod}{%
+  \newcommand{\mod}{\ \nom{mod}\ }%
+}{%
+  \renewcommand{\mod}{\ \nom{mod}\ }%
+}
+% Simbolos varios
+
+% La Z de los numeros enteros
+\newcommand{\ent}{\ensuremath{\mathbb{Z}}}
+% La R de float
+\newcommand{\float}{\ensuremath{\mathbb{R}}}
+% El tipo Bool
+\newcommand{\bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\True}{\ensuremath{\mathrm{True}}}
+\newcommand{\False}{\ensuremath{\mathrm{False}}}
+\newcommand{\Then}{\ensuremath{\rightarrow}}
+\newcommand{\Iff}{\ensuremath{\leftrightarrow}}
+\newcommand{\implica}{\ensuremath{\longrightarrow}}
+\newcommand{\IfThenElse}[3]{\ensuremath{\mathsf{if}\ #1\ \mathsf{then}\ #2\ \mathsf{else}\ #3}}
+
+% Comandos de formato
+\newcommand{\nom}[1]{\ensuremath{\mathsf{#1}}}
+% Comando para un comentario entre /* */. Font normal
+\newcommand{\comentario}[1]{{/*\ #1\ */}}
+
+\newcommand{\ya}{ya especificado en el trabajo anterior}
+
+% Comandos del lenguaje de especificacion
+% Selector para sacar elementos de una lista
+\newcommand{\selec}{\ensuremath{\leftarrow}}
+% La lista vacia
+\newcommand{\lv}{[\,]}
+% El ++ "bonito"
+\newcommand{\masmas}{\ensuremath{+\!\!\!+}}
+
+% Las barritas
+\newcommand{\longitud}[1]{\ensuremath{\left|#1\right|}}
+\newcommand{\cons}{\nom{cons}}
+\newcommand{\indice}{\nom{indice}}
+\newcommand{\conc}{\nom{conc}}
+\newcommand{\concat}{\nom{concat}}
+\newcommand{\cab}{\nom{cab}}
+\newcommand{\cola}{\nom{cola}}
+\newcommand{\sub}{\nom{sub}}
+\newcommand{\en}{\nom{en}}
+\newcommand{\cuenta}[2]{\nom{cuenta}\ensuremath{(#1, #2)}}
+\newcommand{\suma}{\nom{suma}}
+\newcommand{\twodots}{\nom{..}}
+\newcommand{\rango}[2]{[#1\twodots#2]}
+\newcommand{\rangoac}[2]{(#1\twodots#2]}
+\newcommand{\rangoca}[2]{[#1\twodots#2)}
+\newcommand{\rangoaa}[2]{(#1\twodots#2)}
+
+
+% Listas por comprension. El primer parametro es la expresion y el
+% segundo tiene los selectores y las condiciones.
+\newcommand{\comp}[2]{[\,#1\,|\,#2\,]}
+% Listas por extensión
+\newcommand{\ext}[1]{[\,#1\,]}
+
+% acum: el primer parametro es la expresion, el segundo la definicion
+% de la variable de acumulacion, y el tercero los selectores y condiciones.
+\newcommand{\acum}[3]{\mathrm{acum}(#1\; | \; #2, #3)}
+
+\newcommand{\sinonimo}[2]{%
+  \noindent%
+  {\normalfont\bfseries\ttfamily tipo\ }%
+  #1\ =\ #2%
+  {\normalfont\bfseries\,;\par}
+}
+
+\newcommand{\tupla}[2]{\ensuremath{\langle}#1, #2\ensuremath{\rangle}}
+
+% El primer parámetro es el nombre del tipo
+% El segundo parámetro es la lista de elementos
+\newcommand{\enumerado}[2]{%
+  \noindent%
+  {\normalfont\bfseries\ttfamily tipo\ }%
+  #1\ =\ #2%
+  {\normalfont\bfseries\,;\par}
+}
+
+\newcommand{\aux}[4]{%
+  {
+    \addtolength{\leftskip}{1em}
+    \addtolength{\parindent}{-2.5em}
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily #1}%
+    \ifthenelse{\equal{#2}{}}{}{\ (#2)}\ : #3\, = \ensuremath{#4}%
+    {\normalfont\bfseries\,;\par}
+  }
+}
+
+\newcommand{\encabezadoDeProblema}[4]{%
+  % Ponemos la palabrita problema en tt
+%  \noindent%
+  {\normalfont\bfseries\ttfamily problema}%
+  % Ponemos el nombre del problema
+  \ %
+  {\normalfont\ttfamily #2}%
+  \ 
+  % Ponemos los parametros
+  (#3)%
+  \ifthenelse{\equal{#4}{}}{}{%
+  \ =\ %
+  % Ponemos el nombre del resultado
+  {\normalfont\ttfamily #1}%
+  % Por ultimo, va el tipo del resultado
+  \ : #4}
+}
+
+\newcommand{\encabezadoDeTipo}[2]{%
+  % Ponemos la palabrita tipo en tt
+  {\normalfont\bfseries\ttfamily tipo}%
+  % Ponemos el nombre del tipo
+  \ %
+  {\normalfont\ttfamily #2}%
+  \ifthenelse{\equal{#1}{}}{}{$\langle$#1$\rangle$}
+}
+
+\newenvironment{problema}[4][result]{%
+  % El parametro 1 (opcional) es el nombre del resultado
+  % El parametro 2 es el nombre del problema
+  % El parametro 3 son los parametros
+  % El parametro 4 es el tipo del resultado
+  % Preambulo del ambiente problema
+  % Tenemos que definir los comandos requiere, asegura, modifica y aux
+  \newcommand{\requiere}[2][]{%
+    {\normalfont\bfseries\ttfamily requiere}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ %
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\asegura}[2][]{%
+    {\normalfont\bfseries\ttfamily asegura}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\modifica}[1]{%
+    {\normalfont\bfseries\ttfamily modifica\ }%
+    \ensuremath{##1}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \renewcommand{\aux}[4]{%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3\, = \ensuremath{##4}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\res}{#1}
+  \vspace{1ex}
+  \noindent
+  \encabezadoDeProblema{#1}{#2}{#3}{#4}
+  % Abrimos la llave
+  \{\par%
+  \tocarEspacios
+}
+% Ahora viene el cierre del ambiente problema
+{
+  % Cerramos la llave
+  \noindent\}
+  \vspace{1ex}
+}
+
+\newenvironment{tipo}[2][]{%
+  % Preambulo del ambiente tipo
+  % Tenemos que definir los comandos observador (con requiere) y aux
+  \newcommand{\observador}[3]{%
+    {\normalfont\bfseries\ttfamily observador\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \newcommand{\requiere}[2][]{{%
+    \addtolength{\leftskip}{3em}%
+    \setlength{\parindent}{-2em}%
+    {\normalfont\bfseries\ttfamily requiere}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ 
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}}
+  }
+  \newcommand{\explicacion}[1][]{{%
+    \addtolength{\leftskip}{3em}%
+    \setlength{\parindent}{-2em}%
+    \par \hspace{2.3em} ##1%
+    }
+  }
+  \newcommand{\invariante}[2][]{%
+    {\normalfont\bfseries\ttfamily invariante}%
+    \ifthenelse{\equal{##1}{}}{}{\ {\normalfont\ttfamily ##1} :}\ 
+    \ensuremath{##2}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \renewcommand{\aux}[4]{%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3\, = \ensuremath{##4}%
+    {\normalfont\bfseries\,;\par}%
+  }
+  \vspace{1ex}
+  \noindent
+  \encabezadoDeTipo{#1}{#2}
+  % Abrimos la llave
+  \{\par%
+  \tocarEspacios
+}
+% Ahora viene el cierre del ambiente tipo
+{
+  % Cerramos la llave
+  \noindent\}
+  \vspace{1ex}
+}
+
+% Cuestiones de enunciados
+
+% Primero definiciones de cosas al estilo title, author, date
+\def\materia#1{\gdef\@materia{#1}}
+\def\@materia{Algoritmos y Estructuras de Datos I}
+\def\lamateria{\@materia}
+
+\def\cuatrimestre#1{\gdef\@cuatrimestre{#1}}
+\def\@cuatrimestre{No especifi\'o el cuatrimestre}
+\def\elcuatrimestre{\@cuatrimestre}
+
+\def\anio#1{\gdef\@anio{#1}}
+\def\@anio{No especifi\'o el anio}
+\def\elanio{\@anio}
+
+\def\fecha#1{\gdef\@fecha{#1}}
+\def\@fecha{\today}
+\def\lafecha{\@fecha}
+
+\def\nombre#1{\gdef\@nombre{#1}}
+\def\@nombre{No especific'o el nombre}
+\def\elnombre{\@nombre}
+
+\def\practica#1{\gdef\@practica{#1}}
+\def\@practica{No especifi\'o el n\'umero de pr\'actica}
+\def\lapractica{\@practica}
+
+% Esta macro convierte el numero de cuatrimestre a palabras
+\newcommand{\cuatrimestreLindo}{
+  \ifthenelse{\equal{\elcuatrimestre}{1}}
+  {Primer cuatrimestre}
+  {\ifthenelse{\equal{\elcuatrimestre}{2}}
+  {Segundo cuatrimestre}
+  {Verano}}
+}
+
+\newcommand{\depto}{{UBA -- Facultad de Ciencias Exactas y Naturales --
+      Departamento de Computaci\'on}}
+
+\newcommand{\titulopractica}{
+  \centerline{\depto}
+  \vspace{1ex}
+  \centerline{{\Large\lamateria}}
+  \vspace{0.5ex}
+  \centerline{\cuatrimestreLindo de \elanio}
+  \vspace{2ex}
+  \centerline{{\huge Pr\'actica \lapractica -- \elnombre}}
+  \vspace{5ex}
+  \arreglarincisos
+  \newcounter{ejercicio}
+  \newenvironment{ejercicio}{\stepcounter{ejercicio}\textbf{Ejercicio
+      \theejercicio}%
+    \renewcommand\@currentlabel{\theejercicio}%
+  }{\vspace{0.2cm}}
+}  
+
+\newcommand{\titulotp}{
+  \centerline{\depto}
+  \vspace{1ex}
+  \centerline{{\Large\lamateria}}
+  \vspace{0.5ex}
+  \centerline{\cuatrimestreLindo de \elanio}
+  \vspace{0.5ex}
+  \centerline{\lafecha}
+  \vspace{2ex}
+  \centerline{{\huge\elnombre}}
+  \vspace{5ex}
+}
+
+% AMBIENTE CONSIGNAS
+% Se usa en el TP para ir agregando las cosas que tienen que resolver
+% los alumnos.
+% Dentro del ambiente hay que usar \item para cada consigna
+
+\newcounter{consigna}
+\setcounter{consigna}{0}
+
+\newenvironment{consignas}{%
+  \newcommand{\consigna}{\stepcounter{consigna}\textbf{\theconsigna.}}%
+  \newcommand{\ejercicio}[1]{\item ##1 }
+  \renewcommand{\problema}[5][result]{\item
+    \encabezadoDeProblema{##1}{##2}{##3}{##4}\hspace{1em}##5}%
+  \newcommand{\invariante}[2]{\item%
+    {\normalfont\bfseries\ttfamily invariante}%
+    \ ##1\hspace{1em}##2%
+  }
+  \renewcommand{\aux}[4]{\item%
+    {\normalfont\bfseries\ttfamily aux\ }%
+    {\normalfont\ttfamily ##1}%
+    \ifthenelse{\equal{##2}{}}{}{\ (##2)}\ : ##3 \hspace{1em}##4%
+  }
+  % Comienza la lista de consignas
+  \begin{list}{\consigna}{%
+      \setlength{\itemsep}{0.5em}%
+      \setlength{\parsep}{0cm}%
+    }
+}%
+{\end{list}}
+
+
+% MACROS ESPECIFICAS DE IMPERATIVO
+
+% El primer parametro es el nombre del segundo parametro del ==
+% El segundo parametro es el nombre del tipo
+\newcommand{\eligualigual}[2]%
+{%
+\begin{problema}{operator==}{this,#1 : #2}{Bool}
+  \asegura{result == (this == #1)}
+\end{problema}
+}
+
+% Manejo de listas
+% LaTeX deja demasiado espacio entre los items para nuestros propósitos.
+\renewcommand{\enumhook}{\setlength{\itemsep}{-4pt}}
+
+% Esto ajusta el espacio que se deja antes y después de los
+% environments multicol
+\setlength{\multicolsep}{5pt}
+
+\makeatother
+
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+%\usepackage{bbm}
+\usepackage{framed}
+\usepackage{a4wide} % márgenes un poco más anchos que lo usual
+
+
+\newcommand{\comen}[2]{%
+\begin{framed}
+\noindent \textsf{#1:} #2
+\end{framed}
+}
+
+% **************************************************************************
+%
+%  Package 'caratula', version 0.5 (para componer caratulas de TPs del DC).
+%
+%  En caso de dudas, problemas o sugerencias sobre este package escribir a
+%  Brian J. Cardiff (bcardif arroba gmail.com).
+%  Nico Rosner (nrosner arroba dc.uba.ar).
+%
+% **************************************************************************
+
+% ----- Informacion sobre el package para el sistema -----------------------
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{caratula}[2013/08/04 v0.5 Para componer caratulas de TPs del DC]
+\RequirePackage{ifthen}
+\usepackage[pdftex]{graphicx}
+
+% ----- Imprimir un mensajito al procesar un .tex que use este package -----
+
+\typeout{Cargando package 'caratula' v0.5 (2013/08/04)}
+
+% ----- Algunas variables --------------------------------------------------
+
+\let\Materia\relax
+\let\Submateria\relax
+\let\Titulo\relax
+\let\Subtitulo\relax
+\let\Grupo\relax
+\let\Fecha\relax
+\let\Logoimagefile\relax
+\newcommand{\LabelIntegrantes}{}
+\newboolean{showLU}
+\newboolean{showEntregas}
+\newboolean{showDirectores}
+
+% ----- Comandos para que el usuario defina las variables ------------------
+
+\def\materia#1{\def\Materia{#1}}
+\def\submateria#1{\def\Submateria{#1}}
+\def\titulo#1{\def\Titulo{#1}}
+\def\subtitulo#1{\def\Subtitulo{#1}}
+\def\grupo#1{\def\Grupo{#1}}
+\def\fecha#1{\def\Fecha{#1}}
+\def\logoimagefile#1{\def\Logoimagefile{#1}}
+
+% ----- Token list para los integrantes ------------------------------------
+
+\newtoks\intlist\intlist={}
+
+\newtoks\intlistSinLU\intlistSinLU={}
+
+\newcounter{integrantesCount}
+\setcounter{integrantesCount}{0}
+\newtoks\intTabNombre\intTabNombre={}
+\newtoks\intTabLU\intTabLU={}
+\newtoks\intTabEmail\intTabEmail={}
+
+\newcounter{directoresCount}
+\setcounter{directoresCount}{0}
+\newtoks\direcTabNombre\direcTabNombre={}
+\newtoks\direcTabEmail\direcTabEmail={}
+
+% ----- Comando para que el usuario agregue integrantes --------------------
+
+\def\integrante#1#2#3{%
+    \intlist=\expandafter{\the\intlist\rule{0pt}{1.2em}#1&#2&\tt #3\\[0.2em]}%
+    \intlistSinLU=\expandafter{\the\intlistSinLU\rule{0pt}{1.2em}#1 & \tt #3\\[0.2em]}%
+    %
+    \ifthenelse{\value{integrantesCount} > 0}{%
+        \intTabNombre=\expandafter{\the\intTabNombre & #1}%
+        \intTabLU=\expandafter{\the\intTabLU & #2}%
+        \intTabEmail=\expandafter{\the\intTabEmail & \tt #3}%
+    }{
+        \intTabNombre=\expandafter{\the\intTabNombre #1}%
+        \intTabLU=\expandafter{\the\intTabLU #2}%
+        \intTabEmail=\expandafter{\the\intTabEmail \tt #3}%
+    }%
+    \addtocounter{integrantesCount}{1}%
+}
+
+\def\director#1#2{%
+    \ifthenelse{\value{directoresCount} > 0}{%
+        \direcTabNombre=\expandafter{\the\direcTabNombre & #1}%
+        \direcTabEmail=\expandafter{\the\direcTabEmail & \tt #2}%
+    }{
+        \direcTabNombre=\expandafter{\the\direcTabNombre #1}%
+        \direcTabEmail=\expandafter{\the\direcTabEmail \tt #2}%
+    }%
+    \addtocounter{directoresCount}{1}%
+}
+
+% ----- Macro para generar la tabla de integrantes -------------------------
+
+\newcommand{\tablaIntegrantes}{\ }
+
+\newcommand{\tablaIntegrantesVertical}{%
+\ifthenelse{\boolean{showLU}}{%
+    \begin{tabular}[t]{| l @{\hspace{4ex}} c @{\hspace{4ex}} l|}
+        \hline
+        \multicolumn{1}{|c}{\rule{0pt}{1.2em} \LabelIntegrantes} & LU &  \multicolumn{1}{c|}{Correo electr\'onico} \\[0.2em]
+        \hline \hline
+        \the\intlist
+        \hline
+    \end{tabular}
+}{
+    \begin{tabular}[t]{| l @{\hspace{4ex}} @{\hspace{4ex}} l|}
+        \hline
+        \multicolumn{1}{|c}{\rule{0pt}{1.2em} \LabelIntegrantes} &  \multicolumn{1}{c|}{Correo electr\'onico} \\[0.2em]
+        \hline \hline
+        \the\intlistSinLU
+        \hline
+    \end{tabular}
+    }%
+}
+
+\newcommand{\tablaIntegrantesHorizontal}{%
+    \begin{tabular}[t]{ *{\value{integrantesCount}}{c} }
+    \the\intTabNombre \\%
+\ifthenelse{\boolean{showLU}}{
+    \the\intTabLU \\%
+}{}
+    \the\intTabEmail %
+    \end{tabular}%
+}
+
+\newcommand{\tablaDirectores}{%
+\ifthenelse{\boolean{showDirectores}}{%
+    \bigskip
+    Directores
+
+    \smallskip
+    \begin{tabular}[t]{ *{\value{directoresCount}}{c} }
+    \the\direcTabNombre \\%
+    \the\direcTabEmail %
+    \end{tabular}%
+}{}%
+}
+
+\newcommand{\tablaEntregas}{%
+\ifthenelse{\boolean{showEntregas}}{%
+  \bigskip%
+  \begin{tabular}[t]{|l p{3.5cm} p{1.5cm}|}%
+  \hline%
+  \rule{0pt}{1.2em} Instancia & Docente & Nota \\[0.2em] %
+  \hline%
+  \hline%
+  \rule{0pt}{1.2em} Primera entrega & & \\[0.2em] %
+  \hline%
+  \rule{0pt}{1.2em} Segunda entrega & & \\[0.2em] %
+  \hline%
+  \end{tabular}%
+}{}%
+}
+
+% ----- Codigo para manejo de errores --------------------------------------
+
+\def\se{\let\ifsetuperror\iftrue}
+\def\ifsetuperror{%
+    \let\ifsetuperror\iffalse
+    \ifx\Materia\relax\se\errhelp={Te olvidaste de proveer una \materia{}.}\fi
+    \ifx\Titulo\relax\se\errhelp={Te olvidaste de proveer un \titulo{}.}\fi
+    \edef\mlist{\the\intlist}\ifx\mlist\empty\se%
+    \errhelp={Tenes que proveer al menos un \integrante{nombre}{lu}{email}.}\fi
+    \expandafter\ifsetuperror}
+
+\def\aftermaketitle{%
+  \setcounter{page}{1}
+}
+
+% ----- \maketitletxt correspondiente a la versi�n v0.2.1 (texto v0.2 + fecha ) ---------
+
+\def\maketitletxt{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+    \thispagestyle{empty}
+    \begin{center}
+    \vspace*{\stretch{2}}
+    {\LARGE\textbf{\Materia}}\\[1em]
+    \ifx\Submateria\relax\else{\Large \Submateria}\\[0.5em]\fi
+    \ifx\Fecha\relax\else{\Large \Fecha}\\[0.5em]\fi
+    \par\vspace{\stretch{1}}
+    {\large Departamento de Computaci\'on}\\[0.5em]
+    {\large Facultad de Ciencias Exactas y Naturales}\\[0.5em]
+    {\large Universidad de Buenos Aires}
+    \par\vspace{\stretch{3}}
+    {\Large \textbf{\Titulo}}\\[0.8em]
+    {\Large \Subtitulo}
+    \par\vspace{\stretch{3}}
+    \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+    \tablaIntegrantes
+    \end{center}
+    \vspace*{\stretch{3}}
+    \newpage\aftermaketitle}
+
+% ----- \maketitletxtlogo correspondiente v0.2.1 (texto con fecha y logo) ---------
+
+\def\maketitletxtlogo{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+    \thispagestyle{empty}
+    \begin{center}
+    \ifx\Logoimagefile\relax\else\includegraphics{\Logoimagefile}\fi \hfill \includegraphics{logo_dc.jpg}\\[1em]
+    \vspace*{\stretch{2}}
+    {\LARGE\textbf{\Materia}}\\[1em]
+    \ifx\Submateria\relax\else{\Large \Submateria}\\[0.5em]\fi
+    \ifx\Fecha\relax\else{\large \Fecha}\\[0.5em]\fi
+    \par\vspace{\stretch{1}}
+    {\large Departamento de Computaci\'on}\\[0.5em]
+    {\large Facultad de Ciencias Exactas y Naturales}\\[0.5em]
+    {\large Universidad de Buenos Aires}
+    \par\vspace{\stretch{3}}
+    {\Large \textbf{\Titulo}}\\[0.8em]
+    {\Large \Subtitulo}
+    \par\vspace{\stretch{3}}
+    \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+    \tablaIntegrantes
+    \end{center}
+    \vspace*{\stretch{4}}
+    \newpage\aftermaketitle}
+
+% ----- \maketitlegraf correspondiente a la versi�n v0.3 (gr�fica) -------------
+
+\def\maketitlegraf{%
+    \ifsetuperror\errmessage{Faltan datos de la caratula! Ingresar 'h' para mas informacion.}\fi
+%
+    \thispagestyle{empty}
+
+    \ifx\Logoimagefile\relax\else\includegraphics{\Logoimagefile}\fi \hfill \includegraphics{logo_dc.jpg}
+
+    \vspace*{.06 \textheight}
+
+    \noindent \textbf{\huge \Titulo}  \medskip \\
+    \ifx\Subtitulo\relax\else\noindent\textbf{\large \Subtitulo} \\ \fi%
+    \noindent \rule{\textwidth}{1 pt}
+
+    {\noindent\large\Fecha \hspace*\fill \Materia} \\
+    \ifx\Submateria\relax\else{\noindent \hspace*\fill \Submateria}\fi%
+
+    \medskip%
+    \begin{center}
+        \ifx\Grupo\relax\else\textbf{\Grupo}\par\bigskip\fi
+        \tablaIntegrantes
+
+        \tablaDirectores
+
+        \tablaEntregas
+    \end{center}%
+    \vfill%
+%
+    \begin{minipage}[t]{\textwidth}
+        \begin{minipage}[t]{.55 \textwidth}
+            \includegraphics{logo_uba.jpg}
+        \end{minipage}%%
+        \begin{minipage}[b]{.45 \textwidth}
+            \textbf{\textsf{Facultad de Ciencias Exactas y Naturales}} \\
+            \textsf{Universidad de Buenos Aires} \\
+            {\scriptsize %
+            Ciudad Universitaria - (Pabell\'on I/Planta Baja) \\
+                Intendente G\"uiraldes 2160 - C1428EGA \\
+            Ciudad Aut\'onoma de Buenos Aires - Rep. Argentina \\
+                Tel/Fax: (54 11) 4576-3359 \\
+            http://www.fcen.uba.ar \\
+            }
+        \end{minipage}
+    \end{minipage}%
+%
+    \newpage\aftermaketitle}
+
+% ----- Reemplazamos el comando \maketitle de LaTeX con el nuestro ---------
+\renewcommand{\maketitle}{\maketitlegraf}
+
+% ----- Dependiendo de las opciones ---------
+%
+% opciones:
+%   txt     : caratula solo texto.
+%   txtlogo : caratula txt con logo del DC y del grupo (opcional).
+%   graf    : (default) caratula grafica con logo del DC, UBA y del grupo (opcional).
+%
+%\@makeother\*% some package redefined it as a letter (as color.sty)
+%
+% Layout general de la caratula
+%
+\DeclareOption{txt}{\renewcommand{\maketitle}{\maketitletxt}}
+\DeclareOption{txtlogo}{\renewcommand{\maketitle}{\maketitletxtlogo}}
+\DeclareOption{graf}{\renewcommand{\maketitle}{\maketitlegraf}}
+%
+% Etiqueta Autores o Integrantes
+%
+\DeclareOption{integrante}{\renewcommand{\LabelIntegrantes}{Integrante}}
+\DeclareOption{autor}{\renewcommand{\LabelIntegrantes}{Autor}}
+%
+% Formato tabla de integrantes
+%
+\DeclareOption{intVert}{\renewcommand{\tablaIntegrantes}{\tablaIntegrantesVertical}}
+\DeclareOption{intHoriz}{\renewcommand{\tablaIntegrantes}{\tablaIntegrantesHorizontal}}
+\DeclareOption{conLU}{\setboolean{showLU}{true}}
+\DeclareOption{sinLU}{\setboolean{showLU}{false}}
+\DeclareOption{conEntregas}{\setboolean{showEntregas}{true}}
+\DeclareOption{sinEntregas}{\setboolean{showEntregas}{false}}
+\DeclareOption{showDirectores}{\setboolean{showDirectores}{true}}
+\DeclareOption{hideDirectores}{\setboolean{showDirectores}{false}}
+%
+% Opciones predeterminadas
+%
+\ExecuteOptions{intVert}%
+\ExecuteOptions{graf}%
+\ExecuteOptions{integrante}%
+\ExecuteOptions{conLU}%
+\ExecuteOptions{hideDirectores}%
+\ExecuteOptions{sinEntregas}%
+%
+\ProcessOptions\relax
+
+\begin{document}
+
+\titulo{Recuperatorio Trabajo Práctico Especificación}
+\subtitulo{Cine}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructura de Datos I}
+\grupo{Grupo 8}
+
+\integrante{Fosco, Martin Esteban}{449/13}{mfosco2005@yahoo.com.ar}
+\integrante{Murga, Christian Mariano}{982/12}{christian.murga@underverse.com.ar}
+\integrante{Minces Müller, Javier Nicolás}{231/13}{javijavi1994@gmail.com}
+\integrante{Previgliano, Fabricio Jose}{430/13}{fjprevi@gmail.com}
+
+
+
+\maketitle
+
+\clearpage
+
+\materia{Algoritmos y Estructura de Datos I}
+\cuatrimestre{2}
+\anio{2013}
+
+\nombre{\LARGE RTPE Cine}
+
+\titulotp
+
+
+\sinonimo{Actor}{String}
+\sinonimo{Sala}{\ent}
+\enumerado{género}{Aventura, Comedia, Drama, Romántica, Terror}
+
+\vspace{0.5cm}
+
+\begin{tipo}{Pelicula}
+    \observador{nombre}{p: Pelicula}{String}
+    \observador{géneros}{p: Pelicula}{[Género]}
+    \observador{actores}{p: Pelicula}{[Actor]}
+	\observador{es3D}{p: Pelicula}{Bool}
+	\invariante[sinActoresRepetidos]{sinRepetidos(actores(p))}
+	\invariante[sinGénerosRepetidos]{sinRepetidos(generos(p))}
+	\invariante[génerosOrdenados]{Ordenados(generos(p))}
+	\invariante[actoresOrdenados]{PalabrasOrdenadas(actores(p))}
+\end{tipo}
+
+%....................................................................3...........................................
+\begin{problema}{agruparPelisPorGenero}{ps:[Pelicula]}{[(Genero, [Pelicula])]}
+
+\requiere {SinRepetidos(ps)}
+
+\asegura [mismosGeneros] {mismos(primeros(result)),sinRepetidos(listaGeneros(ps))}
+\asegura [mismasPeliculas] {(\forall x \leftarrow result)mismos (sgd(x),peliculasConGenero(prm(x)),ps))}
+
+
+\aux {peliculasConGenero}{a : G\'enero, ps : [Pelicula]}{[Pelicula]}{[px \mid px \leftarrow ps, a \in g\acute{e}neros(px)]}
+\aux {primeros} {gps:[(Genero,[Pelicula])]} {[Genero]} {[prm(i)|i\leftarrow gps]}
+%\aux {listaGeneros}{ }{[Genero]}{[Aventura, Comedia, Drama, Rom\acute{a}ntica, Terror]}
+\aux {listaGeneros}{ps: [Pelicula]}{[Genero]}{[genero(p)|p\leftarrow ps]}
+
+\end{problema}
+
+%....................................................................4...........................................
+\begin{problema}{generarSagaDePeliculas}{as:[Actor], gs:[Genero], nombres:[String]}{[Pelicula]}
+
+\requiere {sinRepetidos(nombres)}
+\requiere {sinRepetidos(as)}
+\requiere {sinRepetidos(gs)}
+\asegura {|result| == |nombres|}
+\asegura [mismosActores]{(\forall p \leftarrow result) mismos(as, actores(p))}
+\asegura [mismosGeneros]{(\forall p \leftarrow result) mismos(gs, generos(p))}
+\asegura [mismosNombres]{mismos(listaDeNombres(result), nombres)}
+\aux {listaDeNombres}{x:[Pelicula]}{[String]}{ [nombres(y)| y \leftarrow x ]}
+\end{problema}
+
+\begin{tipo}{Ticket}
+	\observador{película}{t: Ticket}{Pelicula}
+	\observador{sala}{t: Ticket}{Sala}
+	\observador{usado}{t: Ticket}{Bool}
+\end{tipo}
+
+%....................................................................5...........................................
+\begin{problema}{películaMenosVista}{ts : [Ticket]}{pelicula}{}
+
+
+\asegura [esLaMenosVista] {(\forall t \leftarrow ts)vecesVistaLaPeli(pelicula(t),ts)\\ \geq vecesVistaLaPeli(result,ts)}
+\aux{vecesVistaPeli}{P:Pelicula,ts:[Ticket]}{\ent}{|[x| x \leftarrow ts, usado(x), pelicula(x) == P]|}
+
+\end{problema}
+
+%....................................................................6...........................................
+\begin{problema}{todosLosTicketsParaLaMismaSala}{ts:[Ticket]}{\bool}
+
+\asegura [sonDeLaMismaSala]{todos([sala(ts[i]) == sala(ts[j])|j \leftarrow [0..|ts|]), i \leftarrow [0...|ts|)]) == result}
+\end{problema}
+
+%....................................................................7...........................................
+\begin{problema}{cambiarSala}{ts:[Ticket], vieja: Sala, nueva: Sala}{}{}
+\modifica {ts} 
+
+\asegura [igualCantidadTickets]{\left |ts\right |==\left |pre(ts)\right | }
+\asegura [mismaPeliculaTicket]{(\forall i\leftarrow [0..|pre(ts)|))pelicula(pre(ts)[i])==pelicula(ts[i]) }
+\asegura [mismoEstadoTicket]{(\forall i\leftarrow [0..|pre(ts)|))usado(pre(ts)[i])==usado(ts[i])}
+\asegura [mismaSalaTicket]{(\forall i\leftarrow [0..|pre(ts)|),sala(pre(ts)[i])==vieja)\\sala(ts[i])==nueva}
+\asegura [cambiaSala]{(\forall i\leftarrow [0..|pre(ts)|),sala(pre(ts)[i])\neq vieja)\\sala(ts[i])==sala(pre(ts)[i])}
+
+\end{problema}
+
+
+
+
+\begin{tipo}{Cine}
+	\observador{nombre}{c: Cine}{String}
+	\observador{películas}{c: Cine}{[Peliculas]}
+	\observador{salas}{c: Cine}{[Sala]}
+	\observador{sala}{c: Cine, p: Pelicula}{Sala}
+		\requiere{p \in peliculas(c)}
+	\observador{espectadores}{c: Cine, s: Sala}{\ent}
+		\requiere{s \in salas(c)}
+	\observador{ticketsVendidosSinUsar}{c: Cine}{[Ticket]}
+	\invariante[sinPeliculasRepetidas]{sinRepetidos(nombresDePeliculas(c))}
+	\invariante[sinSalasRepetidas]{sinRepetidos(salas(c))}
+	\invariante[salasDeCineSonSalas]{(\forall p \leftarrow peliculas(c)) sala(c,p) \in salas(c) }
+    \invariante[salasSinPelisSinEspectadores]{\forall s \leftarrow salas(c))\neg tienePeli(c,s) \Rightarrow \\ espectadores (c,s) = 0}
+	\invariante[espectadoresNoNegativos]{(\forall s \leftarrow salas(c)) espectadores(c,s) \geq 0 }
+	\invariante[losTicketsVendidosEstanSinUsar]{(\forall t \selec ticketsVendidosSinUsar(c))\\ \lnot usado(t) }
+	\invariante[salasConsistentes]{(\forall p,q \leftarrow peliculas(c),p\neq q)sala(c; p) \neq sala(c; q) }
+	\invariante[losTicketsVendidosSonParaPeliculasDelCine]{ (\forall t\leftarrow ticketsVendidosSinUsar (c))\\ (pelicula(t)\in peliculas(c)\wedge sala(t)==sala(c,pelicula (t)))  
+}
+\end{tipo}
+
+%....................................................................10...........................................
+\begin{problema}{cineVacio}{n: String}{Cine}{}{}
+
+\asegura [nombreCine]{nombre(result) == n}
+\asegura [estaVacio]{Salas(n) == []}
+
+\end{problema}
+
+%....................................................................11...........................................
+
+\aux{peliSalas}{c: Cine,sl: [Sala]}{[Pelicula]}{[p|s\leftarrow sl,p\leftarrow peliculas(c), sala(c,p)==s]} 
+
+\begin{problema}{agregarPelicula}{c: Cine, p: Pelicula, s: Sala}{}{}
+
+\requiere {p \notin peliculas(c)}
+\requiere {s \in salas(c) }
+\requiere {tienePeli (c,s) == false}
+\modifica {c}
+\asegura [salaDePeli]{sala(c,p) == s}
+\asegura [salasDePelisQueNoCambian]{(\forall p\leftarrow peliculas(pre(c)))sala(c,p)==sala(pre(c),p)} %Lo agregué acá
+\asegura [mismoNombreC]{nombre(c) == nombre(pre(c))}
+\asegura [mismosTicketsC]{mismos(ticketsVendidosSinUsar(c),\\ ticketsVendidosSinUsar(pre(c)))}
+\asegura [MismosEspectadores]{(\forall s\leftarrow Salas(c)) Espectadores(pre(c),s) \\== Espectadores(c,s)}
+\asegura [PelisDeCine]{mismos(peliculas(c),peliculas(pre(c))++p)}
+\asegura [mismasSalas]{mismos(salas(c),salas(pre(c))}
+\end{problema}
+ 
+%....................................................................12...........................................
+\begin{problema}{cerrarSala}{c: Cine, s: Sala}{}
+\requiere {s \in salas(c)}
+\modifica {c}
+\asegura [cantidadSalasMenosUna]{mismos(salas (pre(c)), salas(c)++[s])} 
+\asegura [mantieneNombre]{nombre(c) == nombre(pre(c))}
+\asegura [sacaPeliSiTeniaPeli]{(tienePeli(pre(c),s) == false \wedge mismos(peliculas(c),peliculas(pre(c)) \vee  tienepeli(pre(c),s) \wedge mismos((peliculas(pre(c)),peliculas(c)++pelisalas(pre(c),[s])))}
+\asegura [mismoEstadoTicketsVendidosSinUsar]{mismos(ticketsVendidosSinUsar(pre(c)),ticketsVendidos\-SinUsar(c)++ticketSala(pre(c),s))}
+\asegura [mismaCantEspectadores]{(\forall j\leftarrow salas(c)) espectadores(pre(c),j) == espectadores(c,j)}
+\asegura [mantienenSalas]{(\forall p\leftarrow peliculas(c))sala(c,p)==sala(pre(c),p)}
+
+\aux{ticketSala}{c:cine,s:sala}{[Ticket]}{[t|t \leftarrow ticketsVendidosSinUsar(c), sala(t)==s]}
+\end{problema} 
+
+
+\aux {salasConMenosDe}{e:Int,c:Cine}{[Int]}{[s\mid s\leftarrow salas(c),espectadores(c,s) < e]}
+\aux {PeliDeSala}{c:Cine,s:Sala}{Pelicula}{cab([x\mid x\leftarrow pel\acute{i}culas(c),sala(c,p) == s])}
+\aux {TicketsDeSalas}{c:Cine,ss:[Sala]}{[Ticket]}{[t\mid t\leftarrow ticketsVendidosSinUsar(c),sala(t)\in ss]}
+
+%....................................................................13...........................................
+\begin{problema}{cerrarSalas}{c: Cine, e: \ent}{}{}
+\requiere {e > 0}
+\modifica {c}
+\asegura [mismoNombreC]{nombre(c) == nombre(pre(c))}
+\asegura [salasCambiadas]{mismos(salas(c) ++ salasConMenosDe(e, pre(c)),salas(pre(c)))}
+\asegura [cantidadCorrectaPeliculas]{long(pel\acute{i}culas(c)) == long(pel\acute{i}culas(pre(c)) - long([x\mid x\leftarrow salas\-ConMenosDe(e,pre(c)),Tiene\-Peli(pre(c),x)])}
+\asegura [mantienePelisOtrasSalas]{(\forall  pn\leftarrow pel\acute{i}culas(c))(\exists  pv\leftarrow pel\acute{i}culas(pre(c)))(pn == pv)\\ \wedge (sala(c, pn) == sala(pre(c), pv))\\ \wedge (espectadores(c, sala(c, pn)) == espectadores(pre(c), sala(pre(c), pv)))}
+\asegura [SacaPelisSalas]{(\forall  pv\leftarrow pel\acute{i}culas(pre(c)), sala(c,pv) \in salasConMenosDe(e, pre(c))) \neg ((\exists  pn\leftarrow pel\acute{i}culas(c))pn == pv)}
+\asegura [mismosTicketsVendidosSinUsar]{mismos(ticketsVendidosSinUsar(c) ++ TicketsDeSalas(pre(c),\\salasConMenosDe(e, pre(c))),\\ticketsVendidosSinUsar(pre(c)))}
+
+\end{problema}
+
+%....................................................................14...........................................
+\begin{problema}{cerrarSalasDeLaCadena}{cs: [Cine], e: \ent}{}{}
+\requiere {sinRepetidos([nombre(c)|c\leftarrow cs])}
+\modifica {cs}
+\asegura [mismaCantCines]{|cs| == |pre(cs)|}
+\asegura [mismosNombres]{mismos(nombresDeCines(cs),nombresDeCines(pre(cs)))}
+\asegura [mismasSalas] {(\forall c \leftarrow cs, prec \leftarrow pre(cs), nombre(c) == nombre(prec))\\ mismos(salasConMasDe(e,prec),salas(c))}
+\asegura [mismasPeliculasYsala]{(\forall c \leftarrow cs, prec \leftarrow pre(cs), nombre(c) == nombre(prec))\\ mismos(Peliculas(c),[x|x \leftarrow peliculas(prec), sala(prec,x) \in salasConMasDe(e,prec)]) \\ \wedge ((\forall p \leftarrow peliculas(c), p2 \leftarrow peliculas(prec), p == p2)\\ espectadores(c,sala(c,p)) == espectadores(prec, sala(prec,p2)) \\ \wedge (sala(c,p)==sala(prec,p2)))} 
+\asegura [mismosTickets]{(\forall c \leftarrow cs, prec \leftarrow pre(cs), nombre(c)==nombre(prec))\\ mismos(ticketsVendidosSinUsar(c) ++ TicketsDeSalas(prec,salasConMenosDe(e, prec)),\\ ticketsVendidosSinUsar(prec))}
+\aux {nombresDeCines}{cs:[Cine]}{[String]}{[nombre(c) \mid c\leftarrow cs]}
+\aux {salasDeCines}{cs:[Cine]}{[[Sala]]}{[salas(c)|c \leftarrow cs]}
+\aux {salasConMasDe}{e:Int,c:Cine}{[Int]}{[s\mid s\leftarrow salas(c),espectadores(c,s) >= e]}
+
+\end{problema}
+
+%....................................................................15...........................................
+\begin{problema}{pelicula}{c: Cine, s: Sala}{Pelicula}
+
+\requiere  {s \in (salas(c))}
+\requiere {tienePeli (c,s) == true}
+\asegura {result==cab(peliSalas(c,[s]))}
+
+\end{problema}
+
+%....................................................................16...........................................
+\begin{problema}{venderTicket}{c: Cine, p: Pelicula}{Ticket}
+
+\requiere {p \in peliculas(c)}
+\modifica {c}
+\asegura [peliculaCorrecta]{pel\acute{i}cula(result) == p}
+\asegura [noEsteUsado]{usado(result) == False}
+\asegura [usaElTicket]{mismos([result] ++ ticketsVendidosSinUsar(pre(c)), ticketsVendidosSinUsar(c))}
+\asegura [mantieneNombreC]{nombre(pre(c)) == nombre(c)}
+\asegura [mismasPeliculasC]{mismos(pel\acute{i}culas(c), pel\acute{i}culas(pre(c)))}
+\asegura [mismasSalasC]{mismos(salas(pre(c)), salas(c))}
+\asegura [peliculasMantienenSalas]{(\forall p\leftarrow (peliculas(c))) sala(c,p) == sala(pre(c),p)}
+\asegura [salasMantienenEspectadores]{(\forall s\leftarrow (salas(c))) espectadores(c,s) == espectadores(pre(c),s)}
+
+\end{problema}
+
+%....................................................................17...........................................
+\begin{problema}{ingresarASala}{c: Cine, s: Sala, t: Ticket}{}
+
+\requiere {(t \in ticketsVendidosSinUsar(c))}
+\modifica {c}
+\asegura [usaElTicket]{mismos(ticketsVendidosSinUsar(c) ++ [t], ticketsVendidosSinUsar(pre(c)))}
+\asegura [sumaUnEspectador]{espectadores(pre(c),s) + 1 == espectadores(c,s)}
+\asegura [otrasSalasMantienenEspectadores]{(\forall m\leftarrow salas(c), m \neq s)(espectadores(pre(c),m) == espectadores(c,m))}
+\asegura [peliculasMantienenSalas]{(\forall p\leftarrow peliculas(c)) sala(c,p) == sala(pre(c),p)}
+\asegura [mismasSalas]{mismos(salas(c), salas(pre(c)))}
+\asegura [mismasPeliculas]{mismos(pel\acute{i}culas(c), pel\acute{i}culas(pre(c)))}
+\asegura [mantieneNombre]{nombre(c) == nombre(pre(c))}
+
+
+\end{problema}
+
+%....................................................................18...........................................
+\begin{problema}{pasarA3DUnaPelicula}{c: Cine, nombre: String}{Pelicula}
+
+\requiere {nombre \in nombresDePeliculas(c)}
+\requiere {(\exists p\leftarrow pel\acute{i}culas(c), nombre(p) == nombre)  \neg (es3D(p))}
+
+\modifica {c}
+
+\asegura [otrasPelisIguales]{(\forall p \leftarrow pelicula(pre(c)), nombre(p) == nombre)(nombre(result) == nombre(p))\wedge (actores(p)==actores(result) \wedge (generos(p)==generos(result))}
+\asegura [es3D]{es3D(result)}
+\asegura [mantieneNombre]{nombre(c)==nombre(pre(c))}
+\asegura [cambiaPeli]{mismos(pel\acute{i}culas(c),[p|p\leftarrow pel\acute{i}culas(pre(c),nombre(p) \neq nombre]++[result])}
+\asegura [mantieneSalas]{mismos(salas(c),salas(pre(c)))}
+\asegura [mantieneSalayEspectadores]{(\forall p \leftarrow peliculas(c), p2 \leftarrow peliculas(pre(c)), nombre(p)==nombre(p2))sala(c,p)==sala(pre(c),p2) \\ \wedge espectadores(c,sala(c,p))==espectadores(pre(c),sala(pre(c),p2))}
+\asegura [mantieneNumTicket]{|ticketsVendidosSinUsar(c)|==|ticketsVendidosSinUsar(pre(c))|}
+\asegura [mantieneOtrosTickets]{mismos(ticketsNoP(c,result),tickestNoP(pre(c),result)}
+\asegura [actualizaTicket]{(\forall t \leftarrow ticketsVendidosSinUsar(c),t \notin ticketsNoP(c,result))pelicula(t)==result \wedge sala(t)==sala(c,result) \wedge usado(t)==false}
+
+\aux{ticketsNoP}{c:Cine, p:Pelicula}{[Tickets]}{[t|\\t \leftarrow ticketsVendidosSinUsar(c),nombre(pelicula(t)) \neq nombre(p)]}
+
+\end{problema}
+
+%....................................................................19...........................................
+\begin{problema} {espectadoresPorActor} {c:Cine, la:[Actor]} {[(Actor, \ent)]} 
+%\requiere {(\forall a \leftarrow la) (\exists p\in peliculas(c)) a \in peliculas(c) }
+\asegura {mismos(result,[(a,vieronalActor(a,c))|a\leftarrow la])}
+\aux {vieronalActor} {a:Actor,c:cine} {\ent} {suma([espectadores(c,s)|s\leftarrow salas(c),\\a \in actores(peliDeSala(c,s))])} 
+\end{problema}
+
+%....................................................................20...........................................
+\begin{problema} {agregarGenero} {c:Cine, lp:[Pelicula], g:Genero}{}
+%Agrega el género g a todas las películas lp del Cine.
+\requiere{(\forall p \leftarrow lp) p \in peliculas(c)}
+\modifica{c}
+\asegura [mismoNombreC]{nombre(c) == nombre(pre(c))}
+\asegura [mismasSalas]{mismos(salas(c), salas(pre(c)))}
+\asegura [mismosEspectadores]{(\forall s \leftarrow salas(c)) espectadores(c,s) == espectadores(pre(c),s)}
+\asegura []{mismos(nombresDePeliculas(c),nombresDePeliculas(pre(c)))}
+\asegura [PelisEnlp]{(\forall p \leftarrow pel\acute{i}culas(c),p2 \leftarrow pel\acute{i}culas(pre(c)),(nombre(p2)==nombre(p)) \wedge (p2 \in lp)) (g\acute{e}neros(p) == Ordenados(g\acute{e}neros(p2) ++ [g])) \wedge (actores(p) == actores(p2)) \wedge (es3D(p) == es3D(p2))
+\asegura {[PelisNoEnlp]{mismos(PeliNoLista(c,lp),PeliNoLista(pre(c),lp)}
+\asegura {[MismaSalaAsignada]{(\forall p \leftarrow peliculas(c),p2 \leftarrow peliculas(pre(c)), nombre(p)==nombre(p2)) sala(c,p) == sala (pre(c),p2)}
+\asegura {|TicketsVendidosSinUsar(c)| == |TicketsVendidosSinUsar(pre(c))|}
+\asegura {mismos(TicketsNolp(c,lp), TicketNolp(pre(c),lp))
+\asegura {mismos(SalasTickets(c), SalasTickets(pre(c)))}
+\asegura [MismaCantidadDeticket]{(\forall p \leftarrow lp) |[x|x \leftarrow TicketsVendidosSinUsar(c), nombre(pelicula(x))==nombre(p)]|==|[x|x \leftarrow TicketsVendidosSinUsar(pre(c)), pelicula(x) == p]|
+% Aclarar que aprovechamos la invariante de los ticketsvendidos sinusar que dice que los tickets vendidos sin usar son no usados y son para salas y peliculas validas, y para una pelicula que se proyecta en esa sala. Como estamos describiendo que los nombres de las peliculas son las mismas, entonces la pelicula es la misma por invariante de sinrepetidos de nombres de peliculas, y ademas la sala en la que se proyecta esa pelicula es la misma por el invariante salas y pelis consistentes (o algo asi VER!!!)
+\aux {PeliNoLista}{c:Cine,lp:[Pelicula]}{[Pelicula]}{[x|x \leftarrow pel\acute{i}culas(c), nombre(x) \notin [nombre(p)|p \leftarrow lp]}
+\aux {TicketsNolp}{c:Cine, lp:[Pelicula]}{[Ticket]}{[t|t \leftarrow ticketsVendidosSinUsar(c), nombre(pel\acute{i}cula(t)) \notin [nombre(p)|p \leftarrow lp]]}
+\aux {SalasTickets}{c:Cine}{[Sala]}{[sala(t)|t \leftarrow TicketsVendidosSinUsar(c)]}
+\end{problema}
+
+%.................................................................................................................
+\LARGE \bfseries Auxiliares
+\normalsize \mdseries
+
+\aux{nombresDePeliculas}{c: Cine}{[String]}{[nombre(p) | p \selec peliculas(c)]}
+\aux{tienePeli}{c: Cine, s:Sala}{\bool}{(\exists p \selec pelicula(c)) sala(c,p) = s}
+\aux{sinRepetidos}{l:[T]}{\bool}{(\forall i,j \leftarrow [0...|l|), i\neq j)l[i] \neq l[j]}
+\aux{Ordenados}{a: [T]}{\bool}{(i \leftarrow[0..|a|-1)) \  ord(a[i]) < ord(a[i+1])}
+\aux{PalabrasOrdenadas}{a: [String]}{\bool}{( i \leftarrow[0..|a|-1)) \  a[i] < a[i+1]}
+\aux{salasMenosDee}{c:cine,e:\ent}{[Sala]}{[x|x\leftarrow salas(c), espectadores(c,x)<e]}
+\aux{ticketsSalase}{ts:[Ticket],c:Cine,e:\ent}{[Ticket]}{[x|x \leftarrow ts, sala(x) \in salasMenosDe(e,c)]}
+
+\clearpage
+
+\begin{center}
+\LARGE Informe
+\end{center}
+
+\section{Decisiones Tomadas}
+Para eliminar un elemento de una lista se decidió usar mismos(lista vieja, lista nueva++elementos que sacamos)
+% (incluyen interpretación del enunciado): este punto es especialmente relevante, ya que es la única forma con la que cuenta quien corrige para evaluar si un aspecto de la solución fue buscado deliberadamente o es un efecto colateral no considerado por el grupo.
+
+
+\section{Dificultades encontradas}
+Las principales dificultades encontradas fueron por múltiples interpretaciones de algunos enunciados, tales como que pasaría si se quiere convertir a 3D una pelicula que ya lo es o si en el problema generarSagaDePeliculas pedir que no hubiera géneros ni actores repetidos sería considerado sobreespecificar.
+%encontradas durante el trabajo: incluyen no sólo las relacionadas con el contenido, sino también las organizativas como problemas de coordinación de horarios, diferencias de opinión o enfoque, falta de disponibilidad de equipos, etc. 
+\section{Justificaciones}
+
+% de las decisiones: aquí podrán documentarse sugerencias e indicaciones hechas por docentes (incluyendo su nombre) durante las c<onsultas. El corrector puede no coincidir en algún criterio con otro docente; en ese caso solamente tendrá en cuenta el hecho de que una decisión se tomó en base a una indicación si esa indicación figura en el informe. Por supuesto, podrá constatar lo escrito con el docente en cuestión.
+En el problema pasarA3DUnaPelicula despues de consultar se decidió especificar que la película no tiene que ser 3D antes. Se podría hacer de esta forma o con un asegura anterior que cumpliera en ambos casos.
+En el caso del problema generarSagaDePeliculas se decidió requerir que los géneros y los actores no estén repetidos para no romper invariantes.
+Tuvimos en cuenta que como algunos auxiliares los usamos en varios problemas diferentes decidimos definirlos afuera de ellos.
+
+
+\section{Soluciones Alternativas}
+Se consideró una solución alternativa en el problema generarSagaDePeliculas haciendo que pida un tipo película y no una lista de actores y de géneros, pero se descartó al no ser lo requerido por el enunciado.
+En el problema pasarA3DUnaPelicula se tomó en cuenta la opción admitir que la entrada sea una película 3D y que en ese caso no se modifique nada, pero se rechazó porque era mucho más compleja. De todas formas, en el problema agregarGeneros no requerimos que el género no perteneciera a ninguna película de la lista, sino que decidimos que en ese caso no se agregue dicho género a las que ya lo tienen.
+ % puede tratarse de soluciones que el grupo rechazó por considerarlas inferiores a la elegida o soluciones que les parezcan equivalentes en calidad a la propuesta.
+
