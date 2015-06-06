@@ -1,0 +1,437 @@
+// g++ Promesa.cpp Titulo.cpp DiccT.h DiccOrd2.h Wolfie.cpp main.cpp -o main
+//./main
+
+#include "Modulos-CPP/aed2/Dicc.h"
+#include "Wolfie.h"
+#include "Modulos-CPP/mini_test.h"
+
+#ifndef PROMESAS_H
+#define PROMESAS_H
+#endif
+
+using namespace std;
+using namespace aed2;
+
+const Nat compraVenta(Nat d,const Conj<Promesa> ps);
+const Conj<Promesa> promesasSobreTitulo(Nombre n, TipoPromesa t, Conj<Promesa> ps);
+
+void cambiarCotTs(Nombre nt, Dinero c, Conj<Titulo> &ts);
+Nat limTen(Nombre nt, Conj<Titulo> ts);
+bool titEnAlza(Nombre nt, Conj<Titulo> ts);
+Nat cotActual(Nombre nt, Conj<Titulo> ts);
+
+//--------------------------------------------------Tests-----------------------------------------------------------------
+
+//--------------------Promesa.h---------------------
+void Pcheck_Crear(){
+	Promesa pr;
+	pr.crearPromesa("prom", comprar, 10, 11);
+}
+
+void Pcheck_Observadores(){
+	Promesa pr;
+	pr.crearPromesa("prom", comprar, 10, 11);
+	ASSERT_EQ(pr.titulo(), "prom");
+	ASSERT_EQ(pr.tipo(), comprar);
+	ASSERT_EQ(pr.limite(), 10);
+	ASSERT_EQ(pr.cantidad(), 11);
+}
+
+void Pcheck_PromNoEjecVENTA(){
+	Promesa pr;
+	pr.crearPromesa("prom", vender, 5, 10);
+	ASSERT(not(pr.promesaEjecutable(6,100)));
+}
+
+void Pcheck_PromEjecVENTA(){
+	Promesa pr;
+	pr.crearPromesa("prom", vender, 5, 10);
+	ASSERT(pr.promesaEjecutable(4,100));
+}
+
+void Pcheck_PromNoEjecCOMPRA(){
+	Promesa pr;
+	pr.crearPromesa("prom", comprar, 5, 10);
+	ASSERT(not(pr.promesaEjecutable(4,100)));
+	ASSERT(not(pr.promesaEjecutable(6,9)));
+
+}
+
+void Pcheck_PromEjecCOMPRA(){
+	Promesa pr;
+	pr.crearPromesa("prom", comprar, 5, 10);
+	ASSERT(pr.promesaEjecutable(6,10));
+}
+
+void Pcheck_compraVenta(){
+	Promesa pr1c;
+	pr1c.crearPromesa("t1", comprar, 5, 10);
+	Promesa pr2c;
+	pr2c.crearPromesa("t2", comprar, 5, 10);
+	Promesa pr3c;
+	pr3c.crearPromesa("t3", comprar, 5, 20);
+	Promesa pr1v;
+	pr1v.crearPromesa("t11", vender, 5, 10);
+	Promesa pr2v;
+	pr2v.crearPromesa("t22", vender, 5, 10);
+	Promesa pr3v;
+	pr3v.crearPromesa("t33", vender, 5, 10);
+	Conj<Promesa> c;
+	c.AgregarRapido(pr1c);
+	c.AgregarRapido(pr2c);
+	c.AgregarRapido(pr3c);
+	c.AgregarRapido(pr1v);
+	c.AgregarRapido(pr2v);
+	c.AgregarRapido(pr3v);
+	ASSERT_EQ(compraVenta(0, c), 10);
+}
+
+void Pcheck_promesasSobreTitulo(){
+	Promesa pr1c;
+	pr1c.crearPromesa("t1", comprar, 5, 10);
+	Promesa pr2c;
+	pr2c.crearPromesa("t2", comprar, 5, 10);
+	Promesa pr3c;
+	pr3c.crearPromesa("t1", comprar, 5, 20);
+	Promesa pr1v;
+	pr1v.crearPromesa("t1", vender, 5, 10);
+	Promesa pr2v;
+	pr2v.crearPromesa("t3", vender, 5, 10);
+	Promesa pr3v;
+	pr3v.crearPromesa("t2", vender, 5, 10);
+	Conj<Promesa> c;
+	c.AgregarRapido(pr1c);
+	c.AgregarRapido(pr2c);
+	c.AgregarRapido(pr3c);
+	c.AgregarRapido(pr1v);
+	c.AgregarRapido(pr2v);
+	c.AgregarRapido(pr3v);
+	c = promesasSobreTitulo("t1", comprar, c);
+
+	Conj<Promesa> res;
+	res.AgregarRapido(pr1c);
+	res.AgregarRapido(pr3c);
+
+	ASSERT(c == res);
+}
+//--------------------Titulo.h---------------------
+
+void Tcheck_Crear(){
+	Titulo t;
+	t.nuevoT("titOriginal", 10, 11);
+}
+
+void Tcheck_Observadores(){
+	Titulo t;
+	t.nuevoT("titOriginal", 10, 11);
+	ASSERT_EQ(t.nombre(), "titOriginal");
+	ASSERT_EQ(t.cot(), 10);
+	ASSERT_EQ(t.cantmax(), 11);
+	ASSERT_EQ(t.enalza(), true);
+}
+
+void Tcheck_Recotizar(){
+	Titulo t;
+	t.nuevoT("titOriginal", 10, 11);
+	t.recotizar(9);
+	ASSERT_EQ(t.cot(), 9);
+	ASSERT_EQ(t.enalza(), false);
+
+	t.recotizar(12);
+	ASSERT_EQ(t.cot(), 12);
+	ASSERT_EQ(t.enalza(), true);
+}
+
+void Tcheck_cotActual(){
+	Titulo t1;
+	t1.nuevoT("t1", 10, 11);
+	Titulo t2;
+	t2.nuevoT("t2", 12, 13);
+	Titulo t3;
+	t3.nuevoT("t3", 14, 15);
+	Titulo t4;
+	t4.nuevoT("t4", 16, 17);
+	Conj<Titulo> c;
+	c.AgregarRapido(t1);
+	c.AgregarRapido(t2);
+	c.AgregarRapido(t3);
+	c.AgregarRapido(t4);
+	ASSERT_EQ(14, cotActual("t3", c));
+}
+
+void Tcheck_titEnAlza(){
+	Titulo t1;
+	t1.nuevoT("t1", 10, 11);
+	Titulo t2;
+	t2.nuevoT("t2", 12, 13);
+	Titulo t3;
+	t3.nuevoT("t3", 14, 15);
+	Titulo t4;
+	t4.nuevoT("t4", 16, 17);
+	Conj<Titulo> c;
+	c.AgregarRapido(t1);
+	c.AgregarRapido(t2);
+	c.AgregarRapido(t3);
+	c.AgregarRapido(t4);
+	ASSERT_EQ(true, titEnAlza("t3", c));
+}
+
+void Tcheck_limTen(){
+	Titulo t1;
+	t1.nuevoT("t1", 10, 11);
+	Titulo t2;
+	t2.nuevoT("t2", 12, 13);
+	Titulo t3;
+	t3.nuevoT("t3", 14, 15);
+	Titulo t4;
+	t4.nuevoT("t4", 16, 17);
+	Conj<Titulo> c;
+	c.AgregarRapido(t1);
+	c.AgregarRapido(t2);
+	c.AgregarRapido(t3);
+	c.AgregarRapido(t4);
+	ASSERT_EQ(17, limTen("t4", c));
+}
+
+void Tcheck_cambiarCotTs(){
+	Titulo t1;
+	t1.nuevoT("t1", 10, 11);
+	Titulo t2;
+	t2.nuevoT("t2", 12, 13);
+	Titulo t3;
+	t3.nuevoT("t3", 14, 15);
+	Titulo t4;
+	t4.nuevoT("t4", 16, 17);
+	Conj<Titulo> c;
+	c.AgregarRapido(t1);
+	c.AgregarRapido(t2);
+	c.AgregarRapido(t3);
+	c.AgregarRapido(t4);
+	cambiarCotTs("t2", 5, c);
+
+	ASSERT_EQ(5, cotActual("t2", c));
+	ASSERT_EQ(false, titEnAlza("t2", c));
+
+	cambiarCotTs("t1", 20, c);
+	ASSERT_EQ(20, cotActual("t1", c));
+	ASSERT_EQ(true, titEnAlza("t1", c));
+}
+//--------------------DiccOrd.h--------------------
+
+void DOcheck_diccVacio(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+    ASSERT_EQ(d.CantClaves(),0);
+    ASSERT_EQ(d.MaxClaves(),10);
+}
+
+void DOcheck_diccDefinir1(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+
+	ASSERT(d.Definido(1));
+	ASSERT(!(d.Definido(2)));
+}
+
+void DOcheck_diccDefinir10(){
+	DiccAcot<char, Nat> d;
+	d = DiccAcot<char, Nat>(11);
+	d.Definir('a','1');
+	d.Definir('b','2');
+	d.Definir('c','3');
+	d.Definir('d','4');
+	d.Definir('e','5');
+	d.Definir('f','5');
+	d.Definir('g','5');
+	d.Definir('h','5');
+    d.Definir('i','5');
+    d.Definir('j','5');
+
+	ASSERT(d.Definido('a'));
+	ASSERT(d.Definido('b'));
+	ASSERT(d.Definido('c'));
+	ASSERT(d.Definido('d'));
+	ASSERT(d.Definido('e'));
+	ASSERT(d.Definido('f'));
+	ASSERT(d.Definido('g'));
+	ASSERT(d.Definido('h'));
+	ASSERT(d.Definido('i'));
+	ASSERT(d.Definido('j'));
+}
+
+void DOcheck_diccSignificado(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+	d.Definir(2, 4);
+
+	ASSERT_EQ(d.Significado(2),4);
+	ASSERT(d.Definido(1));
+}
+
+void DOcheck_diccBorrar(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+	d.Definir(2, 4);
+	d.Definir(3, 6);
+    ASSERT((d.Definido(2)));
+	d.Borrar(2);
+    ASSERT(!(d.Definido(2)));
+}
+
+void DOcheck_cantClaves(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+	d.Definir(2, 4);
+	d.Definir(3, 6);
+    ASSERT_EQ(d.CantClaves(),3);
+}
+
+void DOcheck_iterador(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+	d.Definir(2, 4);
+	d.Definir(3, 6);
+    DiccAcot<Nat, Nat>::Iterador itd=d.CrearIt();
+    ASSERT_EQ(itd.SiguienteClave(),1);
+    ASSERT_EQ(itd.SiguienteSignificado(),2);
+    ASSERT(itd.HaySiguiente());
+}
+
+void DOcheck_iteradorfin(){
+	DiccAcot<Nat, Nat> d = DiccAcot<Nat, Nat>(10);
+	d.Definir(1, 2);
+	d.Definir(2, 4);
+	d.Definir(3, 6);
+    DiccAcot<Nat, Nat>::Iterador itd=d.CrearIt();
+    itd.Avanzar();
+    itd.Avanzar();
+    ASSERT_EQ(itd.Siguiente().clave,3);
+    ASSERT(itd.HaySiguiente());
+    itd.Avanzar();
+    ASSERT(!(itd.HaySiguiente()));
+}
+//--------------------DiccT.h----------------------
+
+void DTcheck_DiccVacio(){
+	DiccT<Nat> d;
+    ASSERT(!(d.Definido("hola")))
+}
+
+void DTcheck_Definir1(){
+	DiccT<Nat> d;
+	Nat a=2;
+	d.Definir("hola", a);
+    ASSERT(d.Definido("hola"));
+    ASSERT_EQ(d.Significado("hola"),2);
+}
+
+void DTcheck_Definir10(){
+    DiccT<Nat> dicc;
+	Nat a=1;
+    Nat b=2;
+    Nat c=3;
+    Nat d=4;
+    Nat e=5;
+    Nat f=6;
+    Nat g=7;
+    Nat h=8;
+    Nat i=9;
+    Nat j=10;
+    dicc.Definir("hola", a);
+    dicc.Definir("chau", b);
+    dicc.Definir("baba", c);
+    dicc.Definir("juajua", d);
+    dicc.Definir("juanjuan", e);
+    dicc.Definir("pedropedro", f);
+    dicc.Definir("orale", g);
+    dicc.Definir("trie", h);
+    dicc.Definir("estoesuntrie", i);
+    dicc.Definir("thistrieisatrie", j);
+    ASSERT_EQ(dicc.Significado("hola"),1);
+    ASSERT_EQ(dicc.Significado("chau"),2);
+    ASSERT(dicc.Definido("baba"));
+    ASSERT(dicc.Definido("juajua"));
+    ASSERT(dicc.Definido("juanjuan"));
+    ASSERT(dicc.Definido("pedropedro"));
+    ASSERT(dicc.Definido("orale"));
+    ASSERT(dicc.Definido("trie"));
+    ASSERT(dicc.Definido("estoesuntrie"));
+    ASSERT(dicc.Definido("thistrieisatrie"));
+}
+
+
+//--------------------Wolfie.h---------------------
+
+void Wcheck_1Cliente(){
+    Conj<Cliente> a;
+    a.Agregar(1);
+    Wolfie w=w.inaugurarWolfie(a);
+    Titulo t;
+    t=t.nuevoT("LCDTMAB",8,8);
+    w.agregarTitulo(t);
+    ASSERT_EQ(w.accionesPorCliente(1,"LCDTMAB"),0)
+}
+
+void Wcheck_1ClienteP(){
+    Conj<Cliente> a;
+    a.Agregar(1);
+    Wolfie w=w.inaugurarWolfie(a);
+    Titulo t;
+    t=t.nuevoT("LCDTMAB",8,8);
+    w.agregarTitulo(t);
+	Promesa p=p.crearPromesa("LCDTMAB",comprar,2,2);
+	w.agregarPromesa(1,p);
+	Promesa p2=w.promesasDe(1).Siguiente();
+    ASSERT_EQ(p.titulo(),p2.titulo())
+}
+
+void Wcheck_2Clients1Title(){
+    Conj<Cliente> a;
+    a.Agregar(1);
+	a.Agregar(2);
+    Wolfie w=w.inaugurarWolfie(a);
+    Titulo t;
+    t=t.nuevoT("LCDTMAB",8,8);
+	t=t.nuevoT("VCTS",8,8);
+    w.agregarTitulo(t);
+    //ASSERT_EQ(w.accionesPorCliente(2,"LCDTMAB"),0)
+    ASSERT_EQ(w.accionesPorCliente(1,"VCTS"),0)
+}
+
+int main(){
+//TESTRUN 	Promesa.h---------------------
+RUN_TEST(Pcheck_Crear);
+RUN_TEST(Pcheck_Observadores);
+RUN_TEST(Pcheck_PromNoEjecVENTA);
+RUN_TEST(Pcheck_PromEjecVENTA);
+RUN_TEST(Pcheck_PromNoEjecCOMPRA);
+RUN_TEST(Pcheck_PromEjecCOMPRA);
+RUN_TEST(Pcheck_compraVenta);
+RUN_TEST(Pcheck_promesasSobreTitulo);
+//TESTRUN 	Titulo.h----------------------
+RUN_TEST(Tcheck_Crear);
+RUN_TEST(Tcheck_Observadores);
+RUN_TEST(Tcheck_Recotizar);
+RUN_TEST(Tcheck_cotActual);
+RUN_TEST(Tcheck_titEnAlza);
+RUN_TEST(Tcheck_cambiarCotTs);
+RUN_TEST(Tcheck_limTen);
+//TESTRUN 	DiccOrd.h---------------------
+RUN_TEST(DOcheck_diccVacio);
+RUN_TEST(DOcheck_diccDefinir1);
+RUN_TEST(DOcheck_diccDefinir10);
+RUN_TEST(DOcheck_diccSignificado);
+RUN_TEST(DOcheck_diccBorrar);
+RUN_TEST(DOcheck_cantClaves);
+RUN_TEST(DOcheck_iterador);
+RUN_TEST(DOcheck_iteradorfin);
+//TESTRUN 	DiccT.h-----------------------
+RUN_TEST(DTcheck_DiccVacio);
+RUN_TEST(DTcheck_Definir1)
+RUN_TEST(DTcheck_Definir10)
+//TESTRUN 	Wolfie.h----------------------
+RUN_TEST(Wcheck_1Cliente);
+RUN_TEST(Wcheck_2Clients1Title);
+RUN_TEST(Wcheck_1ClienteP);
+
+return 0;
+}

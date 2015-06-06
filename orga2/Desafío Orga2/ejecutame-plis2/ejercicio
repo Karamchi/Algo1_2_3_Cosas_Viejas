@@ -1,0 +1,10 @@
+Se cuenta con el codigo de ejercicio.c
+
+Se compila con make ejecutame
+
+El programa lee de un archivo 100 bytes y luego le aplica una transformación y ejecuta el resultado. La transformación usa cosas de SIMD.
+
+Hacer que el programa muestre por pantalla "Hola Furfaro!"
+
+
+NOTAS: El programa necesita que el stack sea ejecutable, esto ya viene dado en el binario que proveemos, pero si se desea compilar manualmente, pueden usar el programa execstack y hacer execstack -s ejecutame

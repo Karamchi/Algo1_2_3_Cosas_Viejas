@@ -1,0 +1,7 @@
+Se cuenta con el código "letitflow3.c". Se compila con make letitflow3
+
+El programa pide que se ingresen dos números por la salida estándar.
+
+Si los números cumplen una condición dada, el programa da como output "Ganaste", si no la cumplen, da como output "Perdiste".
+
+Dar un input válido para que el programa diga "Ganaste".

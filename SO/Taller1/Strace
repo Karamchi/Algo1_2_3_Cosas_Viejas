@@ -1,0 +1,16 @@
+clone(child_stack=0, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0) = 6901
+rt_sigaction(SIGINT, {0x8048615, [INT], SA_RESTART}, {SIG_DFL, [], 0}, 8) = 0
+
+rt_sigprocmask(SIG_BLOCK, [CHLD], [], 8) = 0
+rt_sigaction(SIGCHLD, NULL, {SIG_DFL, [], 0}, 8) = 0
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+nanosleep({1, 0}, 0xffce838c)           = 0
+write(1, "sup!\n", 5)                   = 5
+kill(6901, SIGURG)                      = 0
+
+rt_sigprocmask(SIG_BLOCK, [CHLD], [], 8) = 0
+--- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=6901, si_uid=23690} ---
+wait4(-1, 
+//(process:6901): GLib-CRITICAL **: g_slice_set_config: assertion 'sys_page_size == 0' failed
+[{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 6901
+exit_group(0)                           = ?

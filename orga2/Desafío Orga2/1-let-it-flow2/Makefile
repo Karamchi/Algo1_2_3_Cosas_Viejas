@@ -1,0 +1,1 @@
+CFLAGS=-Wall -Wextra -Werror -std=c99 -O0

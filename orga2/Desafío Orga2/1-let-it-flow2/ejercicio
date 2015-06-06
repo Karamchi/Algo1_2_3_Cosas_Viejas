@@ -1,0 +1,9 @@
+Se cuenta con el código "letitflow2.c". Se compila con make letitflow2
+
+El mismo se ejecuta pasandole como parámetros dos números
+
+./letitflow2 1000 200
+
+Si los números cumplen una condición dada, el programa da como output "Ganaste", si no la cumplen, da como output "Perdiste".
+
+Dar un input válido para que el programa diga "Ganaste".

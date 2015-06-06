@@ -1,0 +1,146 @@
+#include "pelicula.h"
+#include "lista.h"
+#include <iostream>
+
+using namespace std;
+
+void sinRepesGenero(Lista<Genero> &l) {
+    int j=0;
+    int i=0;
+    Genero h;
+    while (j<l.longitud()) {
+        h=l.iesimo(j);
+        i=j;
+        while (i<l.longitud()) {
+            if (h==l.iesimo(i)) {
+                l.sacar(l.iesimo(i));
+            }
+            i++;
+        }
+        j++;
+    }
+}
+
+void sinRepesActor(Lista<Actor> &l) {
+    int j=0;
+    int i=0;
+    Actor h;
+    while (j<l.longitud()) {
+        h=l.iesimo(j);
+        i=j;
+        while (i<l.longitud()) {
+            if (h==l.iesimo(i)) {
+                l.sacar(l.iesimo(i));
+            }
+            i++;
+        }
+        j++;
+    }
+}
+
+
+Pelicula::Pelicula(Nombre n, Lista<Genero> gs, Lista<Actor> as, bool b){
+    sinRepesGenero(gs);
+    sinRepesActor(as);
+    nombre_ = n;
+    generos_= gs;
+    actores_= as;
+    es3D_ = b;
+}
+
+string Pelicula::nombreP() const {
+	return nombre_;
+}
+
+Lista<Genero> Pelicula::generosP() const {
+	return generos_;
+}
+
+Lista<Actor> Pelicula::actoresP() const {
+    return actores_;
+}
+
+bool Pelicula::es3DP() const {
+	return es3D_;
+}
+
+
+
+Lista<std::pair<Genero,Lista<Pelicula> > > Pelicula::agruparPelisPorGeneroP(Lista<Pelicula> ps) const{
+ //  Lista <Genero> gs;
+    Lista <Pelicula> pAv;
+    Lista <Pelicula> pC;
+    Lista <Pelicula> pD;
+    Lista <Pelicula> pT;
+    Lista <Pelicula> pR;
+
+ //   gs.agregar(Aventura);
+ //   gs.agregar(Comedia);
+ //   gs.agregar(Drama);
+ //   gs.agregar(Terror);
+ //   gs.agregar(Romantica);
+
+    int i=0;
+    while (i<(ps.longitud())) {
+        if (((ps.iesimo(i)).generosP()).pertenece(Aventura)){
+            pAv.agregar(ps.iesimo(i));}
+        if (((ps.iesimo(i)).generosP()).pertenece(Comedia)){
+            pC.agregar(ps.iesimo(i));}
+        if (((ps.iesimo(i)).generosP()).pertenece(Drama)){
+            pD.agregar(ps.iesimo(i));}
+        if (((ps.iesimo(i)).generosP()).pertenece(Terror)){
+            pT.agregar(ps.iesimo(i));}
+        if (((ps.iesimo(i)).generosP()).pertenece(Romantica)){
+            pR.agregar(ps.iesimo(i));}
+        i++;
+    }
+
+    Lista<std::pair<Genero,Lista<Pelicula> > > g;
+    std::pair<Genero, Lista<Pelicula> > av = make_pair(Aventura,pAv);
+    std::pair<Genero, Lista<Pelicula> > ac = make_pair(Comedia,pC);
+    std::pair<Genero, Lista<Pelicula> > ad = make_pair(Drama,pD);
+    std::pair<Genero, Lista<Pelicula> > ate = make_pair(Terror,pT);
+    std::pair<Genero, Lista<Pelicula> > ar = make_pair(Romantica,pR);
+
+    if( (av.second).longitud() > 0){
+        g.agregar(av);
+        }
+    if( (av.second).longitud() > 0){
+        g.agregar(ac);
+        }
+    if( (av.second).longitud() > 0){
+        g.agregar(ad);
+        }
+    if( (av.second).longitud() > 0){
+        g.agregar(ate);
+        }
+    if( (av.second).longitud() > 0){
+        g.agregar(ar);
+        }
+    return g;
+}
+
+//Pelicula::Pelicula(Nombre n, Lista<Genero> gs, Lista<Actor> as, bool b)
+//{
+//    sinRepetidosG(gs);
+//    sinRepetidosA(as);
+//    this->nombre_ = n;
+//    this->generos_= gs;
+//    this->actores_= as;
+//    this->es3D_ = b;
+//}
+
+
+//Lista <template<Genero,Lista<Pelicula>>struct pair> Pelicula :: agruparPelisPorGeneroP(Lista<Pelicula> ps) {;
+//Lista <<Genero,Lista<Pelicula>>struct pair> Pelicula :: agruparPelisPorGeneroP(Lista<Pelicula> ps) {;
+Lista<Pelicula> Pelicula::generarSagaDePeliculasP(Lista<Actor> as, Lista<Genero> gs, Lista<Nombre> nombres) const{;
+	Lista<Pelicula> lp;
+	int i=0;
+	while (i<nombres.longitud()) {
+		lp.agregar(Pelicula(nombres.iesimo(i),gs,as,false));
+		i++;
+	}
+	return lp;
+}
+
+

@@ -1,0 +1,78 @@
+# depslib dependency file v1.0
+1404679384 source:/home/karamchand/algo2/Tp3/main.cpp
+	"Modulos-CPP/aed2/Dicc.h"
+	"Wolfie.h"
+	"Modulos-CPP/mini_test.h"
+
+1404673551 /home/karamchand/algo2/Tp3/Wolfie.h
+	"DiccT.h"
+	"DiccOrd2.h"
+	"Titulo.h"
+
+1404679906 /home/karamchand/algo2/Tp3/DiccT.h
+	<iostream>
+	"Modulos-CPP/aed2/TiposBasicos.h"
+	"Modulos-CPP/aed2/Arreglo.h"
+	"Modulos-CPP/aed2/Vector.h"
+	"Modulos-CPP/aed2/Conj.h"
+
+1403153405 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/TiposBasicos.h
+	<iostream>
+	<string>
+	<cassert>
+
+1403153405 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/Arreglo.h
+	"TiposBasicos.h"
+
+1403568416 /home/karamchand/algo2/Tp3/DiccOrd.h
+	<iostream>
+	"Modulos-CPP/aed2/TiposBasicos.h"
+	"Modulos-CPP/aed2/Arreglo.h"
+
+1404673551 /home/karamchand/algo2/Tp3/Titulo.h
+	<iostream>
+	"Modulos-CPP/aed2/TiposBasicos.h"
+	"Modulos-CPP/aed2/Conj.h"
+	"Modulos-CPP/aed2/Vector.h"
+	"Promesa.h"
+
+1403563370 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/Conj.h
+	<iostream>
+	"Dicc.h"
+
+1403563370 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/Dicc.h
+	<ostream>
+	"Lista.h"
+
+1404673551 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/Lista.h
+	<ostream>
+	"TiposBasicos.h"
+
+1404673551 /home/karamchand/algo2/Tp3/Promesa.h
+	<iostream>
+	"Modulos-CPP/aed2/TiposBasicos.h"
+	"Modulos-CPP/aed2/Conj.h"
+
+1403153405 /home/karamchand/algo2/Tp3/Modulos-CPP/mini_test.h
+	<iostream>
+	<sstream>
+	<exception>
+
+1403153405 /home/karamchand/algo2/Tp3/Modulos-CPP/aed2/Vector.h
+	"TiposBasicos.h"
+	"Arreglo.h"
+
+1404678893 /home/karamchand/algo2/Tp3/DiccOrd2.h
+	<iostream>
+	"Modulos-CPP/aed2/TiposBasicos.h"
+	"Modulos-CPP/aed2/Arreglo.h"
+
+1404673551 source:/home/karamchand/algo2/Tp3/Promesa.cpp
+	"Promesa.h"
+
+1404673551 source:/home/karamchand/algo2/Tp3/Titulo.cpp
+	"Titulo.h"
+
+1404679123 source:/home/karamchand/algo2/Tp3/Wolfie.cpp
+	"Wolfie.h"
+

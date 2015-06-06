@@ -1,0 +1,21 @@
+Este problema cuenta con tres desafíos.
+
+1)
+El programador del juego TETRIS nos dio una versión de prueba gratuita, la misma muestra un mensaje a veces al momento de hacer líneas. En algunas ocasiones nos muestra un mensaje de error molesto y nos pausa el juego.
+
+Nos gustaría eliminar esa restricción.
+
+El objetivo de este desafío es aplicar un parche al binario de forma tal que tengamos un programa funcional sin la restricción previamente mencionada.
+
+2)
+Idem anterior, pero que cada vez que se posicione una pieza la cuente como una línea.
+
+3)
+Nos interesa hacer trampa en el juego, y modificar el puntaje a gusto. Esto puede hacerse de varias formas. Hacerlo de cualquiera de ellas. 
+
+El resultado es explicar paso a paso cómo lograr esto "a prueba de tontos" (dar todos los comandos e instrucciones y razonamiento que usaron para hacerlo.
+
+
+NOTA: El programa es de código libre (salvo la modificacion hecha para mostrar la pausa), sin embargo, ustedes NO cuentan con el código. Traten de hacerlo SIN buscar el código (usando herramientas como objdump o las que quieran), si no les sale y creen que mirar el código les va a servir, adelante.
+
+Es probable que les falten algunas librerías para poder ejecutarlo. Asegurense de tener instalado ncurses, y si tienen algún problema, arreglenlo como puedan. 

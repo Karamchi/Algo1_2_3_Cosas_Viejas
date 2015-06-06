@@ -1,0 +1,9 @@
+En este problema se cuenta con un código de C en el archivo llamado print.c
+
+Se compila haciendo make print
+
+El programa lee 99 bytes de un archivo, llamado "archivo", y hace un printf de ese contenido.
+
+El objetivo es que dicho printf imprima el contenido de la variable c, sea como sea. (no importa si imprime, además, otras cosas).
+
+Como c es una variable aleatoria, además, hay otro printf que imprime su valor, para que chequeen que esté todo bien.

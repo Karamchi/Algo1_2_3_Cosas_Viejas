@@ -1,0 +1,43 @@
+﻿Tupla<
+Conj(Cliente)
+Conj(Titulo)
+Trie(string,tupla<titulo,enAlza,accWolfie,dicc(cliente,<Acc,conj(pC),conj(pV)>)) (por Nº)
+Dicc(cliente,AccT)) (por n°)
+Conj(Tupla(Cliente,conj(Promesa)))
+
+PromesasDe: O(log(C)·T)
+AccPorCliente: O(log(C)·|nt|)
+InaugurarWolfie: O(C)
+AgTitulo: O(|nt|+C)
+ActualizarCotización: O(|nt|+C log C)
+AgPromesa: O(log(C)+|nt|)
+enAlza: O(|nt|)
+
+
+  \Title{Representaci\'{o}n}
+
+  \begin{Estructura}{wolfie}[estr]
+    \begin{Tupla}[estr]
+      \tupItem{clientes}{conj(cliente)}
+      \tupItem{titulos}{conj(t\'{i}tulo)}
+      \tupItem{datosTitulo}{diccT(string,tupla<titulo:titulo, cantWolfie:acciones, diccCli:diccOrd(cliente,\ datosCliente)>)}
+      \tupItem{accTxCliente}{diccOrd(cliente, acciones)}
+      \tupItem{promUlt}{conj(cliente,conj(promesa))}
+    \end{Tupla}
+
+  \end{Estructura}
+  
+  \begin{Tupla}[datosCliente]
+      \tupItem{acc}{acciones}
+      \tupItem{pCompra}{conj(promesa)}
+      \tupItem{pVenta}{conj(promesa)}
+    \end{Tupla}
+
+    \end{Tupla}\\
+
+    \begin{Tupla}[t\'{i}tulo] %(esto va en un modulo aparte)
+      \tupItem{nombre}{string}
+      \tupItem{cantMax}{nat}
+      \tupItem{cot}{nat}
+      \tupItem{enAlza}{bool}
+    \end{Tupla}

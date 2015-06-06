@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1383587904 source:/home/jminces/.cache/.fr-Uqd1hn/clase/bicicleta.cpp
+	"bicicleta.h"
+	<string>
+
+1383587737 /home/jminces/.cache/.fr-Uqd1hn/clase/bicicleta.h
+	<iostream>
+
+1383588220 source:/home/jminces/Bici/Bicicleta.cpp
+	"Bicicleta.h"
+	<string>
+
+1383588735 /home/jminces/Bici/Bicicleta.h
+	<iostream>
+
+1383588289 source:/home/jminces/Bici/main.cpp
+	<iostream>
+	"Bicicleta.h"
+

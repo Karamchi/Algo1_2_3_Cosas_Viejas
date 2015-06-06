@@ -1,0 +1,9 @@
+En este ejercicio se le tiene que pasar a desborde por stdin algo para que las variables a y b puedan tomar valores arbitrarios.
+
+Para pasar este nivel, generar un archivo tal que al hacer
+
+./desborde < archivo
+
+De como output: 187888694 2.7183
+
+No hace falta volver a compilar desborde, tal vez si lo hacen los resultados no sean los mismos.

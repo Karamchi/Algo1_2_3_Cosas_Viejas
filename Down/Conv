@@ -1,0 +1,40 @@
+Mariano Leo Rean Yo rendí oral junto con otros dos chicos y nos tomó coherencia de caché (en particular me pregunto la relación con write back, etc), ejecución fuera de orden e hyperthreading. Tengo entendido que si es escrito toma otras cosas además de microarquitectura.
+Gonzalo Guillamon a mi me pregunto en particular como aumentar el hitrate en la cache y diferencia entre multithreading y multicore (entre otras cosas) pero no mos tomo nada de el resto de la materia, aunque esta fecha como va mucha gente puede ser escrito, asi q no se
+
+Algún alma caritativa que haya rendido el final de OC2 con el Furfi (no si alguien mas la da, por eso aclaro) me cuenta que pregunta y en que hace énfasis??? La única información que tengo me la dio el propio Furfaro, por lo que no se si es creerla, y solo decía que tres preguntas le bastaban para hacer una masacre.
+Ya no me gusta ·
+
+    Leopoldo Taravilse A mí me tomó Memoria y Ejecución fuera de Orden, nada de los papers y con eso que me tomó me alcanzó para aprobar. Escuché que a mucha gente le tomó eso mismo que a mí.
+    Ignacio Gleria Ejecución fuera de orden, hyperthreading, y le hable hasta que me dijo BASTA LISTO TENES UN 8
+    Juan Carlos Giudici Rendi en sept del año pasado. Me pregunto todo el paper de netburst, a otro chico coherencia de cache
+    Basicamente hablale de ejecucion fuera de orden y que es ht
+    Nicolas Donatucci A nadie le preguntó nada fuera de microarquitectura, no?
+    Ezequiel Coronel Yo la rendí el año pasado. Fue un día que estaba algo enojado por la cantidad de gente que estaba para el final. Me tomó oral: Memoria (+TLB), Microarquitectura (Ejec. Fuera de Orden) e HT --> 6
+    Nicolas Donatucci De paso, a los que les tomó de ejecución fuera de orden. Cómo fue? Qué preguntó?
+    Ezequiel Coronel La típica que te pregunta cuando empezas a hablar de EFeO, es: ¿Desde dónde hasta dónde se ejecuta fuera de orden? ¿Cómo lo hace (que componentes intervienen)?
+    Ezequiel Coronel o te tira: ¿y en tal lado también se ejecuta fuera de orden? ¿dónde está el beneficio?
+    Leopoldo Taravilse La verdad que no me acuerdo que me preguntó exactamente, se que me preguntó por algo de Tomasulo pero no recuerdo muy bien la pregunta ni la respuesta, hace más de un año que rendí ese final
+    Ignacio Gleria Yo simplemente le relate el paper como si fuera Víctor Hugo con el gol del Diego a los ingleses. Me dijo "contame de fuera de orden".
+    Juan Carlos Giudici En netburst todo el pipeline tiene diferentes objetivod en algunas parte acumula en buffers y levanta algo para pararelismo y en otras es secuencial, aprendete todo el pipeline para saber que hace que en cada paso y ya no deberias tener miedo
+    Francisco Noriega ¿Desde donde hasta donde se ejecuta fuera de orden? No estoy muy seguro de entender la pregunta
+    Nicolas Donatucci Juan Carlos Giudici básicamente lo importante sería contar que las instrucciones se buscan en orden y se mandan asi a la cola de prebúsqueda, alterándose el orden despues por los allocators y volviendo a estar en orden para el commit gracias al Re-Order Buffer? (Con eso mas o menos va?)
+    Juan Carlos Giudici Se te sacaste 10 bepi
+    Mauro Giordano A mí me tomó caché y después me preguntó qué pasaba con los xmm cuando hay task switch
+    Martín Langberg Recomiendo los videos de Mutlu https://www.youtube.com/watch?v=BJ87rZCGWU0 Me pregunto cache, le comente algunas cosas que habia visto ahi, y con eso le alcanzo
+    Lecture 1 - Introduction and Basics - Carnegie Mellon - Computer...
+    youtube.com
+    Emilio Almansi a mí me tomó microarquitectura P6, three core engine, y esto: http://goo.gl/mt8tpU
+    ... dos veces
+    Nicolas Donatucci Qué feo P6 y Three Core Engine... me llega a preguntar eso y http://1.bp.blogspot.com/.../s1600/spongebob-brain-fire.gif
+    Axel Stram ¿Qué papers toma? Antes había un par de links en la página (caídos) que ahora ni siquiera están. Yo rescate hace mucho un paper de Hyperthreading y otro de Microarquitectura del Pentium 4, pero nada más.
+    Axel Stram Igual por lo que veo puedo estar 3 meses estudiando e igual me pueden saltar con alguna cosa random que no haya visto
+    Nicolas Donatucci Alguien tiene idea de un porcentaje de gente que da mal sobre el total de los que rinden?
+    Ignacio Gleria Creó que la mayoría aprueba. El tema es que la gente no se presenta. O sea, si aprobé yo, aprueba cualquiera.
+    Leopoldo Taravilse Yo lo que se es el porcentaje de gente que se va con un aplazo del final: 0% si te va mal Furfaro hasta donde yo se no te pasa la nota
+    Ezequiel Coronel Tengo entendido lo mismo que Leopoldo.
+    Ignacio Gleria Ah, si. Yo me presente la primer fecha de febrero/marzo y me sacó cagando porque no había leído los papers. Volví la tercera con los papera leídos. No, no pasa los bochazos.
+    Nicolas Donatucci Buenisimo, me siento más moralizado ahora jajaja
+    48 min · Me gusta
+    Axel Stram ¿Los papers son estos? ¿O hay alguno más? http://www.docdroid.net/.../hyper-threading-technology... http://www.docdroid.net/.../the-microarchitecture-of-the...
+    Martín Langberg Son 6. Acá están todos https://www.dropbox.com/.../AAC26qKfSCOG5HcN8sp25j4ba...
+    Nicolas Donatucci De todas formas, yo los lei todos y esos 2 parecen ser los más importantes (Pentium 4 y Hyper-Threading)
