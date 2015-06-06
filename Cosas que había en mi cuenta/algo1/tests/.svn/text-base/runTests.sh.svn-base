@@ -1,1 +1,0 @@
-runhugs -P..: TestPelicula.hs
