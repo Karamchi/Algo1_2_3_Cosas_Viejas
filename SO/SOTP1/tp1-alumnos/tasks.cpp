@@ -34,49 +34,44 @@ void TaskConBloqueo(int pid, vector<int> params) {
 }
 
 void TaskConsola(int pid, vector<int> params) {
+	srand(time(NULL));
 	int n = params[0];
 	int bmin = params[1];
 	int bmax = params[2];
 
 	for (int i=0;i<n;i++)
-		uso_IO(pid,rand()%(bmax-bmin)+bmax);
+		uso_IO(pid,rand()%(bmax+1-bmin)+bmin);
 }
 
 
 void TaskBatch(int pid, vector<int> params) {
+	srand(time(NULL));
 	int totalcpu = params[0];
 	int cantbloqueos = params[1];
-	vector<int> momentos(cantbloqueos); //Un array sirve pero tira un warning
+	vector<int> momentos(cantbloqueos);
 
 	for (int i=0;i<cantbloqueos;i++) {
-		momentos[i]=totalcpu; //Poco elegante pero funciona
+		momentos[i]=totalcpu; 
 		int agr=rand()%(totalcpu-1)+1;
-		for (int j=0;j<=i;j++) { //insertar ordenado
+
+		//insertar ordenado
+		for (int j=0;j<=i;j++) { 
 			if (agr<momentos[j]) {
 				int sw=momentos[j];
 				momentos[j]=agr;
 				agr=sw;
-			}
-			else if (agr==momentos[j]) {
+			} else if (agr==momentos[j]) {
 				i--;
 				j=i+1;
 			}
 		} 
 	} 
-/*	for (int i=0;i<cantbloqueos;i++) {
-		cout << momentos[i] << ' ';
-	} cout << endl;
-*/
 	for (int i=0;i<cantbloqueos;i++) {
-		int inicioBloq = (i!=0)*momentos[i-1]; //es un if
+		int inicioBloq = (i!=0)*momentos[i-1]; //es un if, porque el primer intervalo empieza en 0
 		int finBloq = momentos[i];
-//		cout << "Usando CPU..." << finBloq-inicioBloq-1 << endl;
 		uso_CPU(pid,finBloq-inicioBloq-1);
-//		cout << "Bloqueando..." << 1 << endl;
 		uso_IO(pid,1);
-	}
-//		cout << "Usando CPU..." << totalcpu-momentos[cantbloqueos-1]-1  << endl;
-	uso_CPU(pid,totalcpu-momentos[cantbloqueos-1]-1);
+	} uso_CPU(pid,totalcpu-momentos[cantbloqueos-1]-1);
 }
 
 void tasks_init(void) {

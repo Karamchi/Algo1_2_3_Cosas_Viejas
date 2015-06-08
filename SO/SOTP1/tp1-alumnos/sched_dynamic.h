@@ -2,7 +2,9 @@
 #define __SCHED_DYNAMIC_
 
 #include <vector>
+#include <list>
 #include <queue>
+#include <algorithm>
 #include "basesched.h"
 
 using namespace std;
@@ -17,7 +19,9 @@ class SchedDynamic : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 
 	private:
-		std::queue<int> q;
+		list< pair<int, int> > q;
+		vector<int> rates;
+		int nextreq;
 };
 
 #endif

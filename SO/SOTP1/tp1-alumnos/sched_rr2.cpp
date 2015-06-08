@@ -20,15 +20,10 @@ SchedRR2::SchedRR2(vector<int> argn) {
 	}
 }
 
-SchedRR2::~SchedRR2() {
-
-}
-
-
 void SchedRR2::load(int pid) {
-	int min=999;
-	int mincpu=999;
-	for (int i=0;i<n;i++) {
+	int min=cuantas[0];
+	int mincpu=0;
+	for (int i=1;i<n;i++) {
 		if (cuantas[i]<min) {
 			min=cuantas[i];
 			mincpu=i;
@@ -36,14 +31,15 @@ void SchedRR2::load(int pid) {
 	}
 	cuantas[mincpu]++;
 	q[mincpu].push(pid);
+	encual.push_back(mincpu);
 }
 
 void SchedRR2::unblock(int pid) {
-	//q.push(pid);
+	q[encual[pid]].push(pid);
 }
 
 int SchedRR2::tick(int cpu, const enum Motivo m) {
-	if (m == EXIT) {
+	if (m == EXIT || m==BLOCK) {
 		// Empieza nuevo quantum de ese core
 		tpasado[cpu]=0;
 		// Si el pid actual terminó, sigue el próximo.
@@ -58,7 +54,7 @@ int SchedRR2::tick(int cpu, const enum Motivo m) {
 		//Si no terminó, pushearlo y devolver el siguiente
 		if (current_pid(cpu)==IDLE_TASK && q[cpu].empty()) return IDLE_TASK;
 		tpasado[cpu]++;
-		if (tpasado[cpu]>=quantums[cpu]) {
+		if (tpasado[cpu]>=quantums[cpu] || current_pid(cpu)==IDLE_TASK) {
 			tpasado[cpu]=0;
 			if (current_pid(cpu)!=IDLE_TASK) q[cpu].push(current_pid(cpu));
 			int sig = q[cpu].front();
@@ -67,7 +63,4 @@ int SchedRR2::tick(int cpu, const enum Motivo m) {
 		} return current_pid(cpu);
 	}
 
-}
-
-int SchedRR2::next(int cpu) {
 }

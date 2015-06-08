@@ -8,7 +8,6 @@
 class SchedRR : public SchedBase {
 	public:
 		SchedRR(std::vector<int> argn);
-	        ~SchedRR();
 		virtual void initialize() {};
 		virtual void load(int pid);
 		virtual void unblock(int pid);
@@ -18,7 +17,6 @@ class SchedRR : public SchedBase {
 		std::queue<int> q;
 		std::vector<int> quantums;
 		std::vector<int> tpasado;
-		int next(int cpu);
 };
 
 #endif

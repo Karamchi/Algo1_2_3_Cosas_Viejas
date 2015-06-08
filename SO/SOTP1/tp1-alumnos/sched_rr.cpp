@@ -17,21 +17,16 @@ SchedRR::SchedRR(vector<int> argn) {
 	}
 }
 
-SchedRR::~SchedRR() {
-
-}
-
-
 void SchedRR::load(int pid) {
 	q.push(pid);	
 }
 
 void SchedRR::unblock(int pid) {
-	//q.push(pid);
+	q.push(pid);
 }
 
 int SchedRR::tick(int cpu, const enum Motivo m) {
-	if (m == EXIT) {
+	if (m == EXIT || m==BLOCK) {
 		// Empieza nuevo quantum de ese core
 		tpasado[cpu]=0;
 		// Si el pid actual terminó, sigue el próximo.
@@ -45,7 +40,7 @@ int SchedRR::tick(int cpu, const enum Motivo m) {
 		//Si no terminó, pushearlo y devolver el siguiente
 		if (current_pid(cpu)==IDLE_TASK && q.empty()) return IDLE_TASK;
 		tpasado[cpu]++;
-		if (tpasado[cpu]>=quantums[cpu]) {
+		if (tpasado[cpu]>=quantums[cpu] || current_pid(cpu)==IDLE_TASK) {
 			tpasado[cpu]=0;
 			if (current_pid(cpu)!=IDLE_TASK) q.push(current_pid(cpu));
 			int sig = q.front();
@@ -54,7 +49,4 @@ int SchedRR::tick(int cpu, const enum Motivo m) {
 		} return current_pid(cpu);
 	}
 
-}
-
-int SchedRR::next(int cpu) {
 }
